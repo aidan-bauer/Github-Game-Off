@@ -31,8 +31,26 @@ public class PlayerMovement : MonoBehaviour {
     public float suspensionSpringDamper = 2500f;
     [Range(0f, 1f)]
     public float targetPosition = 0.5f;
+    [Header("Forward Wheel Friction")]
+    [Range(0f, 1f)]
+    public float forwardExtremumSlip = 0.4f;
+    [Range(0f, 1f)]
+    public float forwardExtremumValue = 1f;
+    [Range(0f, 1f)]
+    public float forwardAsymptoteSlip = 0.8f;
+    [Range(0f, 1f)]
+    public float forwardAsymptoteValue = 0.5f;
     [Range(0f, 1f)]
     public float forwardStiffness = 1f;
+    [Header("Sideways Wheel Friction")]
+    [Range(0f, 1f)]
+    public float sidewaysExtremumSlip = 0.2f;
+    [Range(0f, 1f)]
+    public float sidewaysExtremumValue = 1f;
+    [Range(0f, 1f)]
+    public float sidewaysAsymptoteSlip = 0.5f;
+    [Range(0f, 1f)]
+    public float sidewaysAsymptoteValue = 0.75f;
     [Range(0f, 1f)]
     public float sidewaysStiffness = 1f;
 
@@ -48,16 +66,31 @@ public class PlayerMovement : MonoBehaviour {
         suspension.damper = suspensionSpringDamper;
         suspension.targetPosition = targetPosition;
 
-        /*WheelFrictionCurve forward = new WheelFrictionCurve();
-        WheelFrictionCurve sideways = new WheelFrictionCurve();*/
+        WheelFrictionCurve forward = new WheelFrictionCurve();
+        forward.extremumSlip = forwardExtremumSlip;
+        forward.extremumValue = forwardExtremumValue;
+        forward.asymptoteSlip = forwardAsymptoteSlip;
+        forward.asymptoteValue = forwardAsymptoteValue;
+        forward.stiffness = forwardStiffness;
+
+        WheelFrictionCurve sideways = new WheelFrictionCurve();
+        sideways.extremumSlip = sidewaysExtremumSlip;
+        sideways.extremumValue = sidewaysExtremumValue;
+        sideways.asymptoteSlip = sidewaysAsymptoteSlip;
+        sideways.asymptoteValue = sidewaysAsymptoteValue;
+        sideways.stiffness = sidewaysStiffness;
 
         foreach (AxelInfo axel in axels)
         {
             axel.leftWheel.mass = wheelMass;
             axel.leftWheel.suspensionSpring = suspension;
+            axel.leftWheel.forwardFriction = forward;
+            axel.leftWheel.sidewaysFriction = sideways;
 
             axel.rightWheel.mass = wheelMass;
             axel.rightWheel.suspensionSpring = suspension;
+            axel.rightWheel.forwardFriction = forward;
+            axel.rightWheel.sidewaysFriction = sideways;
         }
     }
 

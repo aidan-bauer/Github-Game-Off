@@ -1147,7 +1147,6 @@ MonoBehaviour:
   controls: 77000000610000007300000064000000
   handBreak: 32
   shifters: 1101000012010000
-  cameraChangers: 1801000019010000
   axels:
   - leftWheel: {fileID: 1403293972}
     rightWheel: {fileID: 1603057316}
@@ -1170,6 +1169,20 @@ MonoBehaviour:
   maxSteerAngle: 30
   turnRate: 10
   antiRoll: 25
+  wheelMass: 20
+  suspensionSpring: 1500
+  suspensionSpringDamper: 2500
+  targetPosition: 0.5
+  forwardExtremumSlip: 0.4
+  forwardExtremumValue: 1
+  forwardAsymptoteSlip: 0.8
+  forwardAsymptoteValue: 0.5
+  forwardStiffness: 0.75
+  sidewaysExtremumSlip: 0.2
+  sidewaysExtremumValue: 1
+  sidewaysAsymptoteSlip: 0.5
+  sidewaysAsymptoteValue: 0.75
+  sidewaysStiffness: 0.75
 --- !u!54 &1553498587
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1196,11 +1209,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46e79b099fc44ae42b9412c3a611f82f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fov: 35
+  cameraChangers: 99
   carCameras:
   - {fileID: 1777608167}
   - {fileID: 1545581446}
   - {fileID: 301468718}
+  fov: 35
 --- !u!1 &1603057314
 GameObject:
   m_ObjectHideFlags: 0

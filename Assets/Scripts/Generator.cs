@@ -409,7 +409,7 @@ public class Generator : MonoBehaviour {
                     nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
                 }
 
-                if (i >= 2)
+                /*if (i >= 2)
                 {
                     Vector2 previousAngle = pathPoints[i - 1] - pathPoints[i - 2];
                     Vector2 nextAngle = pathPoints[i - 1] - nextPos;
@@ -418,7 +418,7 @@ public class Generator : MonoBehaviour {
                     //Debug.Log(dot);
 
                     //if path doubles back on itself
-                    /*while (dot > 0.1f)
+                    while (dot > 0.1f)
                     {
                         nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
 
@@ -427,8 +427,8 @@ public class Generator : MonoBehaviour {
                         dot = Vector2.Dot(previousAngle.normalized, nextAngle.normalized);
                         
                         Debug.Log(dot + " revised");
-                    }*/
-                }
+                    }
+                }*/
 
                 /*if (!IsInXBound(nextPos))
                     nextPos.x *= -1;
