@@ -54,7 +54,7 @@ public class PlayerMovement : MonoBehaviour {
     [Range(0f, 1f)]
     public float sidewaysStiffness = 1f;
 
-    bool gasPress, brakePress, steerPress;
+    bool gasPress, brakePress/*, steerPress*/;
     float turnAngle;
     
     Rigidbody rigid;
@@ -125,17 +125,17 @@ public class PlayerMovement : MonoBehaviour {
         if (Input.GetKey(controls[1]))
         {
             turnAngle = -turnRate;
-            steerPress = true;
+            //steerPress = true;
         }
         else if (Input.GetKey(controls[3]))
         {
             turnAngle = turnRate;
-            steerPress = true;
+            //steerPress = true;
         }
         else
         {
             turnAngle = 0;
-            steerPress = false;
+            //steerPress = false;
         }
 
         if (Input.GetKeyDown(shifters[0]))

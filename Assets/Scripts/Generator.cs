@@ -76,10 +76,10 @@ public class Generator : MonoBehaviour {
         //create road course
         CourseCreator cc = new CourseCreator(dimension, numPathPoints, minStep, stepRange, courseDetail);
         cc.GeneratePath();
-        for (int i = 0; i < chaikinPasses; i++)
+        /*for (int i = 0; i < chaikinPasses; i++)
         {
             cc.ChaikinSmoothing();
-        }
+        }*/
 
         //convert points
         //for (int i = 0; i < numPathPoints; i++)
@@ -188,6 +188,37 @@ public class Generator : MonoBehaviour {
     public Vector2 CenterAroundZero2D(Vector2 point)
     {
         return new Vector2(point.x - (dimension / 2f) + 0.5f, point.y - (dimension / 2f) + 0.5f) * scale;
+    }
+
+    //Check if the lines are interescting in 2d space
+    //Alternative version from http://thirdpartyninjas.com/blog/2008/10/07/line-segment-intersection/
+    bool IsIntersecting(Vector2 L1_start, Vector2 L1_end, Vector2 L2_start, Vector2 L2_end)
+    {
+        bool isIntersecting = false;
+
+        //3d -> 2d
+        Vector2 p1 = new Vector2(L1_start.x, L1_start.y);
+        Vector2 p2 = new Vector2(L1_end.x, L1_end.y);
+
+        Vector2 p3 = new Vector2(L2_start.x, L2_start.y);
+        Vector2 p4 = new Vector2(L2_end.x, L2_end.y);
+
+        float denominator = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+
+        //Make sure the denominator is > 0, if so the lines are parallel
+        if (denominator != 0)
+        {
+            float u_a = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denominator;
+            float u_b = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denominator;
+
+            //Is intersecting if u_a and u_b are between 0 and 1
+            if (u_a >= 0 && u_a <= 1 && u_b >= 0 && u_b <= 1)
+            {
+                isIntersecting = true;
+            }
+        }
+
+        return isIntersecting;
     }
 
     //one section of the grid
@@ -305,33 +336,8 @@ public class Generator : MonoBehaviour {
 
         int dimension, numPathPoints, detail;
         float segmentLength, minStep, maxStepRange;
-        //Vector2[] pathPoints;
-        //Vector3[] coursePoints;
         List<Vector2> pathPoints;
         List<Vector3> coursePoints;
-
-        /*public Vector2[] PathPoints
-        {
-            get
-            {
-                //return pathPoints;
-                return pathPoints.ToArray();
-            }
-            set
-            {
-                //pathPoints = value.OfType<Vector2>().ToList();
-                pathPoints = new List<Vector2>(value);
-            }
-        }
-
-        public Vector3[] CoursePoints
-        {
-            get
-            {
-                //return coursePoints;
-                return coursePoints.ToArray();
-            }
-        }*/
 
         public List<Vector2> PathPoints
         {
@@ -365,13 +371,9 @@ public class Generator : MonoBehaviour {
             maxStepRange = _maxStepRange;
             minStep = _minStep;
             segmentLength = Random.Range(minStep, maxStepRange);
-            //pathPoints = new Vector2[_pathPoints + ((_pathPoints-1) * _detail)];
-            //coursePoints = new Vector3[_pathPoints];
             pathPoints = new List<Vector2>();
             coursePoints = new List<Vector3>();
-
-            //Vector2 randStart = Random.insideUnitCircle;
-            //pathPoints[0] = Abs(Random.insideUnitCircle) * dimension;
+            
             pathPoints.Add(Abs(Random.insideUnitCircle.normalized) * dimension);
 
             //we will raycast down to find the exact point on the generated terrain beneath the generated point
@@ -402,6 +404,7 @@ public class Generator : MonoBehaviour {
             //for (int i = 1; i < pathPoints.Length; i++)
             for (int i = 1; i < numPathPoints; i++)
             {
+                segmentLength = Random.Range(minStep, maxStepRange);
                 Vector2 nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
 
                 while (!IsPointInBounds(nextPos))
@@ -409,35 +412,21 @@ public class Generator : MonoBehaviour {
                     nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
                 }
 
-                /*if (i >= 2)
+                if (i >= 1)
                 {
-                    Vector2 previousAngle = pathPoints[i - 1] - pathPoints[i - 2];
-                    Vector2 nextAngle = pathPoints[i - 1] - nextPos;
-
-                    float dot = Vector2.Dot(previousAngle.normalized, nextAngle.normalized);
-                    //Debug.Log(dot);
-
-                    //if path doubles back on itself
-                    while (dot > 0.1f)
+                    for (int j = 1; j < pathPoints.Count; j++)
                     {
-                        nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
-
-                        previousAngle = pathPoints[i - 1] - pathPoints[i - 2];
-                        nextAngle = pathPoints[i - 1] - nextPos;
-                        dot = Vector2.Dot(previousAngle.normalized, nextAngle.normalized);
-                        
-                        Debug.Log(dot + " revised");
+                        if (IsIntersecting(nextPos, pathPoints[j], pathPoints[j], pathPoints[j-1]))
+                        {
+                            //nextPos = Quaternion.Euler(0, 90, 0) * nextPos;
+                            segmentLength = Random.Range(minStep, maxStepRange);
+                            nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength); //generate new point
+                            //j = 0;  //reset the loop
+                            Debug.Log("crossing point " + j);
+                        }
                     }
-                }*/
-
-                /*if (!IsInXBound(nextPos))
-                    nextPos.x *= -1;
-
-                if (!IsInYBound(nextPos))
-                    nextPos.y *= -1;*/
-                //Debug.Log(segmentLength);
-
-                //pathPoints[i] = nextPos;
+                }
+                
                 pathPoints.Add(nextPos);
                 segmentLength = Random.Range(minStep, maxStepRange);
             }
@@ -446,20 +435,15 @@ public class Generator : MonoBehaviour {
         //smooth out the 
         public void ChaikinSmoothing()
         {
-            //Vector2[] newPathPoints = new Vector2[(pathPoints.Length - 2) * 2 + 2];
             List<Vector2> newPathPoints = new List<Vector2>();
 
             //first and last vertices are the same
-            //newPathPoints[0] = pathPoints[0];
-            //newPathPoints[newPathPoints.Length - 1] = pathPoints[pathPoints.Length - 1];
             newPathPoints.Insert(0, pathPoints[0]);
             newPathPoints.Add(pathPoints[pathPoints.Count - 1]);
             
             int j = 1;
             for (int i = 0; i < pathPoints.Count - 2; i++)
             {
-                //newPathPoints[j] = pathPoints[i] + (pathPoints[i + 1] - pathPoints[i]) * 0.75f;
-                //newPathPoints[j + 1] = pathPoints[i + 1] + (pathPoints[i + 2] - pathPoints[i + 1]) * 0.25f;
                 newPathPoints.Insert(j, pathPoints[i] + (pathPoints[i + 1] - pathPoints[i]) * 0.75f);
                 newPathPoints.Insert(j + 1, pathPoints[i + 1] + (pathPoints[i + 2] - pathPoints[i + 1]) * 0.25f);
                 j += 2;
@@ -470,7 +454,6 @@ public class Generator : MonoBehaviour {
 
         public void GenerateCourse()
         {
-            //for (int i = 1; i < coursePoints.Length; i++)
             for (int i = 1; i < pathPoints.Count; i++)
             {
                 RaycastHit hit;
@@ -480,40 +463,50 @@ public class Generator : MonoBehaviour {
                 {
                     //Vector3 castPos;
                     Vector2 dir = pathPoints[i - 1] + (pathPoints[i] - pathPoints[i - 1]) * (cast * (1f / detail));
-                    //prevent first position from being multiplied by zero
-                    /*if (cast == 0)
-                    {
-                        castPos = pathPoints[i - 1];
-                    } else
-                    {
-                        castPos = dir * (cast * (1f / detail));
-                    }*/
 
                     //raycast directly down from each path point
                     if (Physics.Raycast(new Vector3(dir.x, 100, dir.y), Vector3.down, out hit, 150f))
                     {
-                        //coursePoints[i] = hit.point;
                         if (hit.collider.CompareTag("Terrain"))
                         {
-                            //coursePoints[i] = hit.point;
                             coursePoints.Add(hit.point);
                         }
                     }
 
                     cast++;
                 }
-
-                //raycast directly down from each path point
-                /*if (Physics.Raycast(new Vector3(pathPoints[i].x, 100, pathPoints[i].y), Vector3.down, out hit, 150f))
-                {
-                    //coursePoints[i] = hit.point;
-                    if (hit.collider.CompareTag("Terrain"))
-                    {
-                        //coursePoints[i] = hit.point;
-                        coursePoints.Add(hit.point);
-                    }
-                }*/
             }
+        }
+
+        //Check if the lines are interescting in 2d space
+        //Alternative version from http://thirdpartyninjas.com/blog/2008/10/07/line-segment-intersection/
+        bool IsIntersecting(Vector2 L1_start, Vector2 L1_end, Vector2 L2_start, Vector2 L2_end)
+        {
+            bool isIntersecting = false;
+
+            //3d -> 2d
+            Vector2 p1 = new Vector2(L1_start.x, L1_start.y);
+            Vector2 p2 = new Vector2(L1_end.x, L1_end.y);
+
+            Vector2 p3 = new Vector2(L2_start.x, L2_start.y);
+            Vector2 p4 = new Vector2(L2_end.x, L2_end.y);
+
+            float denominator = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
+
+            //Make sure the denominator is > 0, if so the lines are parallel
+            if (denominator != 0)
+            {
+                float u_a = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denominator;
+                float u_b = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denominator;
+
+                //Is intersecting if u_a and u_b are between 0 and 1
+                if (u_a >= 0 && u_a <= 1 && u_b >= 0 && u_b <= 1)
+                {
+                    isIntersecting = true;
+                }
+            }
+
+            return isIntersecting;
         }
     }
 }
