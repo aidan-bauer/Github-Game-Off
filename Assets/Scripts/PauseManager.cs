@@ -38,5 +38,7 @@ public class PauseManager : MonoBehaviour {
     public void Reset()
     {
         isPaused = false;
+        SetTimeScale(isPaused);
+        SetPauseUI(isPaused);
     }
 }

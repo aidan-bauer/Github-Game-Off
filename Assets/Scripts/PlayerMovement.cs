@@ -1,9 +1,20 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour {
 
     public Transform cameraRef;
+    public Text gearText, speedText;
+    Vector3 resetPos;
+    [HideInInspector] public Vector3 ResetPosition
+    {
+        set
+        {
+            resetPos = value;
+        }
+    }
 
+    //controls
     public KeyCode[] controls = new KeyCode[] {
         KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D
     };
@@ -11,12 +22,16 @@ public class PlayerMovement : MonoBehaviour {
     public KeyCode[] shifters = new KeyCode[] {
         KeyCode.UpArrow, KeyCode.DownArrow
     };
+    public KeyCode reset = KeyCode.R;
 
     public AxelInfo[] axels;
     public GearInfo[] gears = new GearInfo[] {
-        new GearInfo(-5f, -20f),    //reverse
-        new GearInfo(15f, 50f),
-        new GearInfo(25f, 100f)
+        new GearInfo(-25f, -60f, "R"),    //reverse
+        new GearInfo(0f, 0f, "N"),
+        new GearInfo(30f, 100f, "1"),
+        new GearInfo(65f, 160f, "2"),
+        new GearInfo(100f, 250f, "3"),
+        new GearInfo(150f, 375f, "4")
     };
     public int currentGear = 1;
     public float gasForce = 50f;
@@ -147,6 +162,11 @@ public class PlayerMovement : MonoBehaviour {
         {
             DownShift();
         }
+
+        if (Input.GetKeyDown(reset))
+        {
+            ResetCar();
+        }
     }
 
     private void FixedUpdate()
@@ -164,7 +184,6 @@ public class PlayerMovement : MonoBehaviour {
                     //power
                     if (axel.leftWheel.motorTorque <= gears[currentGear].TopSpeed)
                     {
-                        Debug.Log("accelerating!");
                         axel.leftWheel.motorTorque += gears[currentGear].Acceleration * Time.fixedDeltaTime;
                         axel.rightWheel.motorTorque += gears[currentGear].Acceleration * Time.fixedDeltaTime;
                     }
@@ -237,6 +256,8 @@ public class PlayerMovement : MonoBehaviour {
             updateVisualWheels(axel.leftWheel);
             updateVisualWheels(axel.rightWheel);
         }
+
+        speedText.text = (rigid.velocity.magnitude * 2.237f).ToString();
     }
 
     void updateVisualWheels(WheelCollider collider)
@@ -261,12 +282,23 @@ public class PlayerMovement : MonoBehaviour {
     {
         if (currentGear < gears.Length - 1)
             currentGear++;
+        gearText.text = gears[currentGear].GearName;
     }
 
     void DownShift()
     {
         if (currentGear > 0)
             currentGear--;
+        gearText.text = gears[currentGear].GearName;
+    }
+
+    public void ResetCar()
+    {
+        transform.Translate(0, 5, 0, Space.World);
+        //transform.position = resetPos + Vector3.up * 3f;
+        Quaternion resetRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
+        transform.rotation = resetRot;
+        rigid.velocity = Vector3.zero;
     }
 
     //update wheels at start with editor information
@@ -282,6 +314,7 @@ public class GearInfo
 {
     [SerializeField] float acceleration;
     [SerializeField] float topSpeed;
+    [SerializeField] string gearName;
 
     public float TopSpeed {
         get {
@@ -297,9 +330,18 @@ public class GearInfo
         }
     }
 
-    public GearInfo(float _acceleration, float _topSpeed)
+    public string GearName
+    {
+        get
+        {
+            return gearName;
+        }
+    }
+
+    public GearInfo(float _acceleration, float _topSpeed, string _gearName)
     {
         acceleration = _acceleration;
         topSpeed = _topSpeed;
+        gearName = _gearName;
     }
 }

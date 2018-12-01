@@ -15,22 +15,42 @@ public class Generator : MonoBehaviour {
     public float scale = 1f;
     [Range(0.1f, 2f)]
     public float heightScale = 1f;
+    [Range(3f, 24f)]
+    [Tooltip("Controls how far up the starting point will be generated.")]
+    public float startingPointHeight = 4f;
+    [Range(1f, 3f)]
+    [Tooltip("Controls how straight or winding the course will be. Higher values = more winding course")]
+    public float horizontalStretching = 2f;
+    [Range(1, 5)]
+    public int waypointSmoothingPasses = 3;
+    [Range(5f, 40f)]
+    public float roadWidth = 5f;
 
     public bool useRandomSeed = true;
     public string seed;
-
-    public LineRenderer road;
+    
+    [SerializeField] GameObject road;
+    [SerializeField] Transform waypoint;
+    [SerializeField] Transform finish;
+    [SerializeField] GameObject borderHolder;
 
     Node[,] map;
 
-    Mesh terrainMesh;
-    Material terrainMat;
-    MeshFilter filter;
-    MeshCollider meshCollider;
+    Mesh terrainMesh, roadMesh;
+    MeshFilter filter, roadFilter;
+    MeshCollider meshCollider, roadCollider;
 
     Vector3[] vertices;
     Vector2[] uv;
     int[] triangles;
+
+    Transform[] waypoints;
+    List<Vector3> roadVertices;
+    //List<Vector2> roadUV;
+    List<int> roadTriangles;
+
+    Transform player;
+    LineRenderer minimapRoad;
 
 
     private void Awake()
@@ -38,11 +58,22 @@ public class Generator : MonoBehaviour {
         filter = GetComponent<MeshFilter>();
         meshCollider = GetComponent<MeshCollider>();
 
+        roadFilter = road.GetComponent<MeshFilter>();
+        roadCollider = road.GetComponent<MeshCollider>();
+
         terrainMesh = new Mesh();
+        roadMesh = new Mesh();
         terrainMesh.name = "Terrain Mesh";
-        //filter.sharedMesh = meshCollider.sharedMesh = terrainMesh;
+        roadMesh.name = "Road Mesh";
 
         GetComponent<MeshRenderer>().material.mainTextureScale = new Vector2(dimension, dimension);
+        player = GameObject.FindGameObjectWithTag("Player").transform;
+        minimapRoad = GetComponentInChildren<LineRenderer>();
+        
+        foreach (Transform border in borderHolder.GetComponentsInChildren<Transform>())
+        {
+            border.position = border.forward * ((dimension - 2) * scale) / 2f;
+        }
     }
 
     // Use this for initialization
@@ -50,6 +81,15 @@ public class Generator : MonoBehaviour {
         map = new Node[dimension, dimension];
 
         Generate();
+
+        //place player exactly one "segment" into the road
+        player.position = waypoints[courseDetail].position + Vector3.up * 2f;
+        //player.rotation = Quaternion.LookRotation((waypoints[2].transform.position - waypoints[1].transform.position).normalized);
+        player.rotation = waypoints[courseDetail].rotation;
+
+        //place finish line exactly one "segment" from the end
+        finish.position = waypoints[waypoints.Length - courseDetail].position;
+        finish.rotation = Quaternion.Euler(0, waypoints[waypoints.Length - courseDetail].rotation.eulerAngles.y, waypoints[waypoints.Length - courseDetail].rotation.eulerAngles.z);
     }
 
     void Generate()
@@ -61,7 +101,7 @@ public class Generator : MonoBehaviour {
             seed = System.DateTime.Now.ToLongTimeString();
 
         //generate the heightmap
-        DiamondSquare ds = new DiamondSquare(map, 5);
+        DiamondSquare ds = new DiamondSquare(map, heightScale);
         ds.GenerateHeightMap(dimension - 1);
         float[,] heightMapValues = ds.ReturnHeightMap();
 
@@ -69,20 +109,19 @@ public class Generator : MonoBehaviour {
         {
             for (int y = 0; y < dimension; y++)
             {
-                map[x, y].Height = heightMapValues[x, y] * heightScale;
+                map[x, y].Height = heightMapValues[x, y];
             }
         }
 
         //create road course
-        CourseCreator cc = new CourseCreator(dimension, numPathPoints, minStep, stepRange, courseDetail);
+        CourseCreator cc = new CourseCreator(dimension, numPathPoints, minStep, stepRange, courseDetail, startingPointHeight, horizontalStretching);
         cc.GeneratePath();
-        /*for (int i = 0; i < chaikinPasses; i++)
+        for (int i = 0; i < chaikinPasses; i++)
         {
             cc.ChaikinSmoothing();
-        }*/
+        }
 
         //convert points
-        //for (int i = 0; i < numPathPoints; i++)
         for (int i = 0; i < cc.PathPoints.Count; i++)
         {
             Vector2 convertedPoint = CenterAroundZero2D(cc.PathPoints[i]);
@@ -91,7 +130,6 @@ public class Generator : MonoBehaviour {
 
         //add data one square at a time
         //for each one add 4 verts, 4 UV points, and 2 triangles (6 entries)
-
         int tris = 0;
 
         for (int x = 0, i = 0; x < dimension - 1; x++, i++)
@@ -111,9 +149,6 @@ public class Generator : MonoBehaviour {
                 uv[i + dimension + 1] = new Vector2((float)(x + 1) / dimension, (float)(y + 1) / dimension);
 
                 //triangle
-                /*triangles[tris + 0] = i + 0;                  //0, 0
-                triangles[tris + 1] = i + dimension;            //0, 1
-                triangles[tris + 2] = i + 1;                    //1, 0*/
                 triangles[tris + 0] = i + 0;                    //0, 0
                 triangles[tris + 1] = i + 1;                    //0, 1
                 triangles[tris + 2] = i + dimension;            //1, 0
@@ -123,16 +158,6 @@ public class Generator : MonoBehaviour {
                 triangles[tris + 5] = i + dimension;            //1, 1
 
                 tris += 6;
-
-                /*if (x == 2)
-                {
-                    Debug.Log((i) + ", " + (x * dimension + y));
-                }*/
-
-                /*if (x > dimension-2)
-                {
-                    Debug.Log(x + ", " + y + ", " + "; " +i + ", " + (i + 1) + ", " + (i + dimension) + ", " + (i + dimension + 1));
-                }*/
             }
         }
 
@@ -141,25 +166,122 @@ public class Generator : MonoBehaviour {
         terrainMesh.triangles = triangles;
 
         terrainMesh.RecalculateNormals();
-        //terrainMesh.RecalculateTangents();
 
         filter.sharedMesh = meshCollider.sharedMesh = null;
         filter.sharedMesh = meshCollider.sharedMesh = terrainMesh;
 
         cc.GenerateCourse();
 
+        waypoints = new Transform[cc.CoursePoints.Count - 1];
+
         for (int i = 0; i < cc.CoursePoints.Count; i++)
         {
             Debug.DrawLine(cc.CoursePoints[i], cc.CoursePoints[i] + (Vector3.up * 50f), Color.red, 1000f, false);
         }
 
-        /*for (int i = 1; i < cc.CoursePoints.Count; i++)
+        //generate and orient the waypoints
+        for (int i = 0; i < cc.CoursePoints.Count - 1; i++)
         {
-            Debug.DrawLine(cc.CoursePoints[i - 1], cc.CoursePoints[i], Color.green, 1000f, false);
-        }*/
+            Quaternion newRot = Quaternion.LookRotation((cc.CoursePoints[i] - cc.CoursePoints[i + 1]).normalized);
 
-        road.positionCount = cc.CoursePoints.Count;
-        road.SetPositions(cc.CoursePoints.ToArray());
+            if (i == cc.CoursePoints.Count - 1)
+            {
+                newRot = Quaternion.LookRotation((cc.CoursePoints[i] - cc.CoursePoints[i - 1]).normalized);
+            }
+
+            Transform nodeInst = Instantiate(waypoint, cc.CoursePoints[i], Quaternion.identity, road.transform) as Transform;
+            //nodeInst.localScale = new Vector3(roadWidth, 2.5f, 1f);
+            nodeInst.name += " " + i;
+            nodeInst.localRotation = newRot;
+            waypoints[i] = nodeInst;
+        }
+        
+        //smooth rotations
+        for (int j = 0; j < waypointSmoothingPasses; j++)
+        {
+            for (int i = 1; i < waypoints.Length - 1; i++)
+            {
+                NormaLizeWaypointRotation(waypoints[i], waypoints[i].position - waypoints[i - 1].position, waypoints[i + 1].position - waypoints[i].position);
+            }
+        }
+
+        //add vertices to road
+        for (int i = 0; i < waypoints.Length; i++)
+        {
+            roadVertices.Add(waypoints[i].position - (waypoints[i].right * (roadWidth / 1.5f)) - (waypoints[i].up * 2.5f));
+            roadVertices.Add(waypoints[i].position - (waypoints[i].right * (roadWidth / 2f)));
+            roadVertices.Add(waypoints[i].position);
+            roadVertices.Add(waypoints[i].position + (waypoints[i].right * (roadWidth / 2f)));
+            roadVertices.Add(waypoints[i].position + (waypoints[i].right * (roadWidth / 1.5f)) - (waypoints[i].up * 2.5f));
+        }
+
+        //add triangles to road
+        //for (int i = 2; i < roadVertices.Count - 2; i += 2)
+        for (int i = 5; i < roadVertices.Count-5; i += 5)
+        {
+            //triangle 1
+            /*roadTriangles.Add(i);
+            roadTriangles.Add(i - 1);
+            roadTriangles.Add(i - 2);
+
+            //triangle 1
+            roadTriangles.Add(i);
+            roadTriangles.Add(i + 1);
+            roadTriangles.Add(i - 1);*/
+            //left faces
+            roadTriangles.Add(i);
+            roadTriangles.Add(i - 4);
+            roadTriangles.Add(i - 5);
+
+            roadTriangles.Add(i);
+            roadTriangles.Add(i + 1);
+            roadTriangles.Add(i - 4);
+
+            //mid left faces
+            roadTriangles.Add(i + 1);
+            roadTriangles.Add(i - 3);
+            roadTriangles.Add(i - 4);
+
+            roadTriangles.Add(i + 1);
+            roadTriangles.Add(i + 2);
+            roadTriangles.Add(i - 3);
+
+            //mid right faces
+            roadTriangles.Add(i + 2);
+            roadTriangles.Add(i - 2);
+            roadTriangles.Add(i - 3);
+
+            roadTriangles.Add(i + 2);
+            roadTriangles.Add(i + 3);
+            roadTriangles.Add(i - 2);
+
+            //right faces
+            roadTriangles.Add(i + 3);
+            roadTriangles.Add(i - 1);
+            roadTriangles.Add(i - 2);
+
+            roadTriangles.Add(i + 3);
+            roadTriangles.Add(i + 4);
+            roadTriangles.Add(i - 1);
+        }
+
+        roadMesh.vertices = roadVertices.ToArray();
+        roadMesh.triangles = roadTriangles.ToArray();
+
+        roadMesh.RecalculateNormals();
+
+        roadFilter.sharedMesh = roadCollider.sharedMesh = null;
+        roadFilter.sharedMesh = roadCollider.sharedMesh = roadMesh;
+
+        minimapRoad.positionCount = cc.CoursePoints.Count;
+        for (int i = 1; i < cc.CoursePoints.Count - 1; i++)
+        {
+            Vector3 pointToAdd = cc.CoursePoints[i];
+            pointToAdd.y = 0;
+            minimapRoad.SetPosition(i, pointToAdd + (Vector3.up * 25f));
+        }
+
+        minimapRoad.positionCount = cc.CoursePoints.Count - 1;
     }
 
     private void Reset()
@@ -176,7 +298,12 @@ public class Generator : MonoBehaviour {
         uv = new Vector2[vertices.Length];
         triangles = new int[(dimension) * (dimension) * 6];
 
+        roadVertices = new List<Vector3>();
+        //roadUV = new List<Vector2>();
+        roadTriangles = new List<int>();
+
         terrainMesh.Clear();
+        roadMesh.Clear();
     }
 
     //display a point as if the it's centered around zero
@@ -190,35 +317,12 @@ public class Generator : MonoBehaviour {
         return new Vector2(point.x - (dimension / 2f) + 0.5f, point.y - (dimension / 2f) + 0.5f) * scale;
     }
 
-    //Check if the lines are interescting in 2d space
-    //Alternative version from http://thirdpartyninjas.com/blog/2008/10/07/line-segment-intersection/
-    bool IsIntersecting(Vector2 L1_start, Vector2 L1_end, Vector2 L2_start, Vector2 L2_end)
+    //smooth node rotations in the road to prevent glitches
+    void NormaLizeWaypointRotation(Transform waypoint, Vector3 angle1, Vector3 angle2)
     {
-        bool isIntersecting = false;
-
-        //3d -> 2d
-        Vector2 p1 = new Vector2(L1_start.x, L1_start.y);
-        Vector2 p2 = new Vector2(L1_end.x, L1_end.y);
-
-        Vector2 p3 = new Vector2(L2_start.x, L2_start.y);
-        Vector2 p4 = new Vector2(L2_end.x, L2_end.y);
-
-        float denominator = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
-
-        //Make sure the denominator is > 0, if so the lines are parallel
-        if (denominator != 0)
-        {
-            float u_a = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denominator;
-            float u_b = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denominator;
-
-            //Is intersecting if u_a and u_b are between 0 and 1
-            if (u_a >= 0 && u_a <= 1 && u_b >= 0 && u_b <= 1)
-            {
-                isIntersecting = true;
-            }
-        }
-
-        return isIntersecting;
+        Vector3 average = (angle1 + angle2).normalized;
+        float yAngle = Mathf.Atan2(average.x, average.z) * Mathf.Rad2Deg;
+        waypoint.localRotation = Quaternion.Euler(waypoint.transform.localRotation.eulerAngles.x, yAngle, waypoint.transform.localRotation.eulerAngles.z);
     }
 
     //one section of the grid
@@ -268,10 +372,10 @@ public class Generator : MonoBehaviour {
             randomHeight = _randomHeight;
 
             //set initial values of the four corners
-            heightMap[0, 0] = Random.Range(-randomHeight / 2, randomHeight);
-            heightMap[0, heightMap.GetLength(0) - 1] = Random.Range(-randomHeight / 2, randomHeight);
-            heightMap[heightMap.GetLength(1) - 1, 0] = UnityEngine.Random.Range(-randomHeight / 2, randomHeight);
-            heightMap[heightMap.GetLength(0) - 1, heightMap.GetLength(0) - 1] = Random.Range(-randomHeight / 2, randomHeight);
+            heightMap[0, 0] = Random.Range(-randomHeight / 2f, randomHeight);
+            heightMap[0, heightMap.GetLength(0) - 1] = Random.Range(-randomHeight / 2f, randomHeight);
+            heightMap[heightMap.GetLength(1) - 1, 0] = UnityEngine.Random.Range(-randomHeight / 2f, randomHeight);
+            heightMap[heightMap.GetLength(0) - 1, heightMap.GetLength(0) - 1] = Random.Range(-randomHeight / 2f, randomHeight);
         }
 
         public void GenerateHeightMap(int startingStepSize)
@@ -287,7 +391,7 @@ public class Generator : MonoBehaviour {
                 {
                     for (int y = 0; y < heightMap.GetLength(1) - 1; y += stepSize)
                     {
-                        DiamondStep(x, y, stepSize, Random.Range(-randomHeight, randomHeight));
+                        DiamondStep(x, y, stepSize, Random.Range(-randomHeight / 2f, randomHeight));
                     }
                 }
 
@@ -295,7 +399,7 @@ public class Generator : MonoBehaviour {
                 {
                     for (int y = 0; y < heightMap.GetLength(1); y += halfStep)
                     {
-                        SquareStep(x, y, halfStep, Random.Range(-randomHeight, randomHeight));
+                        SquareStep(x, y, halfStep, Random.Range(-randomHeight / 2f, randomHeight));
                     }
                 }
 
@@ -336,6 +440,7 @@ public class Generator : MonoBehaviour {
 
         int dimension, numPathPoints, detail;
         float segmentLength, minStep, maxStepRange;
+        float startingPointHeight, horizontalStretching;
         List<Vector2> pathPoints;
         List<Vector3> coursePoints;
 
@@ -363,18 +468,22 @@ public class Generator : MonoBehaviour {
         //transform path points into world space
         //use those path points to generate the course
 
-        public CourseCreator(int _dimension, int _pathPoints, float _minStep, float _maxStepRange, int _detail)
+        public CourseCreator(int _dimension, int _pathPoints, float _minStep, float _maxStepRange, int _detail, float _startingPointHeight, float _horizontalStretching)
         {
             dimension = _dimension;
             numPathPoints = _pathPoints;
             detail = _detail;
             maxStepRange = _maxStepRange;
             minStep = _minStep;
+            startingPointHeight = _startingPointHeight;
+            horizontalStretching = _horizontalStretching;
+
             segmentLength = Random.Range(minStep, maxStepRange);
             pathPoints = new List<Vector2>();
             coursePoints = new List<Vector3>();
             
-            pathPoints.Add(Abs(Random.insideUnitCircle.normalized) * dimension);
+            //pathPoints.Add(Abs(Random.insideUnitCircle.normalized) * dimension);
+            pathPoints.Add(new Vector2(Random.Range(10f, dimension - 10), Random.Range(3f, startingPointHeight)));
 
             //we will raycast down to find the exact point on the generated terrain beneath the generated point
         }
@@ -399,32 +508,24 @@ public class Generator : MonoBehaviour {
             return point.y <= dimension && point.y >= 0;
         }
 
+        Vector2 GenerateRandomPoint()
+        {
+            Vector2 randomPos = Random.insideUnitCircle;
+            randomPos.y = Mathf.Abs(randomPos.y / horizontalStretching);
+            return randomPos;
+        }
+
         public void GeneratePath()
         {
             //for (int i = 1; i < pathPoints.Length; i++)
             for (int i = 1; i < numPathPoints; i++)
             {
                 segmentLength = Random.Range(minStep, maxStepRange);
-                Vector2 nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
+                Vector2 nextPos = pathPoints[i - 1] + (GenerateRandomPoint() * segmentLength);
 
                 while (!IsPointInBounds(nextPos))
                 {
-                    nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength);
-                }
-
-                if (i >= 1)
-                {
-                    for (int j = 1; j < pathPoints.Count; j++)
-                    {
-                        if (IsIntersecting(nextPos, pathPoints[j], pathPoints[j], pathPoints[j-1]))
-                        {
-                            //nextPos = Quaternion.Euler(0, 90, 0) * nextPos;
-                            segmentLength = Random.Range(minStep, maxStepRange);
-                            nextPos = pathPoints[i - 1] + (Random.insideUnitCircle.normalized * segmentLength); //generate new point
-                            //j = 0;  //reset the loop
-                            Debug.Log("crossing point " + j);
-                        }
-                    }
+                    nextPos = pathPoints[i - 1] + (GenerateRandomPoint() * segmentLength);
                 }
                 
                 pathPoints.Add(nextPos);
@@ -469,44 +570,13 @@ public class Generator : MonoBehaviour {
                     {
                         if (hit.collider.CompareTag("Terrain"))
                         {
-                            coursePoints.Add(hit.point);
+                            coursePoints.Add(hit.point + (Vector3.up * 2f));
                         }
                     }
 
                     cast++;
                 }
             }
-        }
-
-        //Check if the lines are interescting in 2d space
-        //Alternative version from http://thirdpartyninjas.com/blog/2008/10/07/line-segment-intersection/
-        bool IsIntersecting(Vector2 L1_start, Vector2 L1_end, Vector2 L2_start, Vector2 L2_end)
-        {
-            bool isIntersecting = false;
-
-            //3d -> 2d
-            Vector2 p1 = new Vector2(L1_start.x, L1_start.y);
-            Vector2 p2 = new Vector2(L1_end.x, L1_end.y);
-
-            Vector2 p3 = new Vector2(L2_start.x, L2_start.y);
-            Vector2 p4 = new Vector2(L2_end.x, L2_end.y);
-
-            float denominator = (p4.y - p3.y) * (p2.x - p1.x) - (p4.x - p3.x) * (p2.y - p1.y);
-
-            //Make sure the denominator is > 0, if so the lines are parallel
-            if (denominator != 0)
-            {
-                float u_a = ((p4.x - p3.x) * (p1.y - p3.y) - (p4.y - p3.y) * (p1.x - p3.x)) / denominator;
-                float u_b = ((p2.x - p1.x) * (p1.y - p3.y) - (p2.y - p1.y) * (p1.x - p3.x)) / denominator;
-
-                //Is intersecting if u_a and u_b are between 0 and 1
-                if (u_a >= 0 && u_a <= 1 && u_b >= 0 && u_b <= 1)
-                {
-                    isIntersecting = true;
-                }
-            }
-
-            return isIntersecting;
         }
     }
 }

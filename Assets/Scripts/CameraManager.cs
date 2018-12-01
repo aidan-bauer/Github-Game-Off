@@ -4,6 +4,7 @@ public class CameraManager : MonoBehaviour
 {
     [SerializeField] KeyCode cameraChangers = KeyCode.C;
     [SerializeField] Camera[] carCameras;
+    [Range(1f, 179f)]
     [SerializeField] float fov = 35f;
 
     int currentCameraIndex = 0;
@@ -23,6 +24,11 @@ public class CameraManager : MonoBehaviour
             if (currentCameraIndex>carCameras.Length-1)
             {
                 currentCameraIndex = 0;
+            }
+
+            if (currentCameraIndex == 0)
+            {
+
             }
 
             ChangeCamera();

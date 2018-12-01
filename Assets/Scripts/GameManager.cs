@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
+    public GameObject finishedCanvas;
     public Text timerText, finalText;
 
     float startTime, stopTime, totalRunTime;
@@ -11,7 +12,7 @@ public class GameManager : MonoBehaviour {
 
     private void FixedUpdate()
     {
-        if (isTiming)
+        if (isTiming && !PauseManager.IsPaused)
         {
             timer += Time.deltaTime;
             UpdateTimerUI();
@@ -38,6 +39,12 @@ public class GameManager : MonoBehaviour {
     {
         //update the timer ui every fixedupdate
         timerText.text = finalText.text = FormatTime();
+    }
+
+    public void Finish()
+    {
+        StopTimer();
+        finishedCanvas.SetActive(true);
     }
 
     string FormatTime()
