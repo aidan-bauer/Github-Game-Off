@@ -1,14 +1,22 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour {
 
     public GameObject finishedCanvas;
+    public GameObject playerCanvas, minimap;
     public Text timerText, finalText;
+    
 
     float startTime, stopTime, totalRunTime;
     float timer = 0f;
     bool isTiming;
+
+    private void Start()
+    {
+        StartTimer();
+    }
 
     private void FixedUpdate()
     {
@@ -45,10 +53,12 @@ public class GameManager : MonoBehaviour {
     {
         StopTimer();
         finishedCanvas.SetActive(true);
+        playerCanvas.SetActive(false);
+        minimap.SetActive(false);
     }
 
     string FormatTime()
     {
-        return Mathf.Floor(timer / 60f) + "" + timer % 60f;
+        return (Mathf.Floor(timer / 60f).ToString("N0") + ":" + (timer % 60f).ToString("N2"));
     }
 }

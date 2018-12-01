@@ -14,6 +14,9 @@ public class FinishTrigger : MonoBehaviour {
     {
         if (other.CompareTag("PlayerCollide"))
         {
+            Rigidbody rigid = other.GetComponentInParent<Rigidbody>();
+            rigid.velocity = Vector3.zero;
+            rigid.isKinematic = true;
             manager.Finish();
         }
     }

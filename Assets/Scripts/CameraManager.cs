@@ -26,11 +26,6 @@ public class CameraManager : MonoBehaviour
                 currentCameraIndex = 0;
             }
 
-            if (currentCameraIndex == 0)
-            {
-
-            }
-
             ChangeCamera();
         }
 	}

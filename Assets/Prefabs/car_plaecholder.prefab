@@ -1238,7 +1238,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -1323,9 +1323,9 @@ MonoBehaviour:
   turnRate: 2
   antiRoll: 100
   wheelMass: 20
-  suspensionSpring: 1500
-  suspensionSpringDamper: 2500
-  targetPosition: 0.75
+  suspensionSpring: 1000
+  suspensionSpringDamper: 1500
+  targetPosition: 0.25
   forwardExtremumSlip: 0.7
   forwardExtremumValue: 1
   forwardAsymptoteSlip: 0.85

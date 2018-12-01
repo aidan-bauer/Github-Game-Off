@@ -4,6 +4,7 @@ public class PauseManager : MonoBehaviour {
 
     public KeyCode pauseKey = KeyCode.Escape;
     public GameObject pauseCanvas;
+    public GameObject timerCanvas, playerCanvas, minimap;
 
     static bool isPaused;
 
@@ -33,6 +34,9 @@ public class PauseManager : MonoBehaviour {
     public void SetPauseUI(bool paused) {
         //set pause canvas visible
         pauseCanvas.SetActive(paused);
+        playerCanvas.SetActive(!paused);
+        timerCanvas.SetActive(!paused);
+        minimap.SetActive(!paused);
     }
 
     public void Reset()

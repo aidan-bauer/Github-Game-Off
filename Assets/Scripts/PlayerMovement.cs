@@ -191,14 +191,14 @@ public class PlayerMovement : MonoBehaviour {
                     axel.leftWheel.motorTorque = Mathf.Clamp(axel.leftWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
                     axel.rightWheel.motorTorque = Mathf.Clamp(axel.rightWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
                 }
-                else if (brakePress)
+                /*else if (brakePress)
                 {
                     axel.leftWheel.motorTorque = 0f;
                     axel.rightWheel.motorTorque = 0f;
 
                     axel.leftWheel.brakeTorque = brakeForce;
                     axel.rightWheel.brakeTorque = brakeForce;
-                }
+                }*/
                 else
                 {
                     axel.leftWheel.brakeTorque = 0f;
@@ -226,6 +226,15 @@ public class PlayerMovement : MonoBehaviour {
 
                 axel.leftWheel.steerAngle = maxSteerAngle * turnAngle;
                 axel.rightWheel.steerAngle = maxSteerAngle * turnAngle;
+            }
+
+            if (brakePress)
+            {
+                axel.leftWheel.motorTorque = 0f;
+                axel.rightWheel.motorTorque = 0f;
+
+                axel.leftWheel.brakeTorque = brakeForce;
+                axel.rightWheel.brakeTorque = brakeForce;
             }
 
             //anti-roll bars

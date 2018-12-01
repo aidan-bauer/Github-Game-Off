@@ -273,15 +273,13 @@ public class Generator : MonoBehaviour {
         roadFilter.sharedMesh = roadCollider.sharedMesh = null;
         roadFilter.sharedMesh = roadCollider.sharedMesh = roadMesh;
 
-        minimapRoad.positionCount = cc.CoursePoints.Count;
-        for (int i = 1; i < cc.CoursePoints.Count - 1; i++)
+        minimapRoad.positionCount = cc.CoursePoints.Count - 1;
+        for (int i = 0; i < cc.CoursePoints.Count - 1; i++)
         {
-            Vector3 pointToAdd = cc.CoursePoints[i];
+            Vector3 pointToAdd = cc.CoursePoints[i + 1];
             pointToAdd.y = 0;
             minimapRoad.SetPosition(i, pointToAdd + (Vector3.up * 25f));
         }
-
-        minimapRoad.positionCount = cc.CoursePoints.Count - 1;
     }
 
     private void Reset()
