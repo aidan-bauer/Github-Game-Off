@@ -536,7 +536,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1904418817537348}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 2.1}
+  m_LocalPosition: {x: 0, y: 1, z: 2.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4817535034808074}
@@ -643,7 +643,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1379069019989222}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4951126023821090}
@@ -660,7 +660,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1571529786554250}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 2, y: 1, z: 4}
   m_Children: []
   m_Father: {fileID: 4817535034808074}
@@ -713,7 +713,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1609346276158908}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4441658808098792}
@@ -1147,7 +1147,7 @@ Rigidbody:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1609346276158908}
   serializedVersion: 2
-  m_Mass: 500
+  m_Mass: 250
   m_Drag: 0
   m_AngularDrag: 0.05
   m_UseGravity: 1
@@ -1287,6 +1287,7 @@ MonoBehaviour:
   cameraRef: {fileID: 4441658808098792}
   gearText: {fileID: 114226528217501270}
   speedText: {fileID: 114855345036775170}
+  center: {x: 0, y: 0.25, z: 0}
   controls: 77000000610000007300000064000000
   handBreak: 32
   shifters: 1101000012010000
@@ -1304,27 +1305,27 @@ MonoBehaviour:
   - acceleration: -150
     topSpeed: -170
     gearName: R
-  - acceleration: 140
-    topSpeed: 150
+  - acceleration: 80
+    topSpeed: 85
     gearName: 1
-  - acceleration: 120
-    topSpeed: 200
+  - acceleration: 65
+    topSpeed: 110
     gearName: 2
-  - acceleration: 100
-    topSpeed: 325
+  - acceleration: 45
+    topSpeed: 160
     gearName: 3
-  - acceleration: 90
-    topSpeed: 500
+  - acceleration: 25
+    topSpeed: 220
     gearName: 4
   currentGear: 1
   gasForce: 100
   brakeForce: 350
   maxSteerAngle: 30
   turnRate: 2
-  antiRoll: 100
+  antiRoll: 150
   wheelMass: 20
-  suspensionSpring: 1000
-  suspensionSpringDamper: 1500
+  suspensionSpring: 750
+  suspensionSpringDamper: 1000
   targetPosition: 0.25
   forwardExtremumSlip: 0.7
   forwardExtremumValue: 1

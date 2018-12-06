@@ -90,7 +90,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -309,7 +309,7 @@ MonoBehaviour:
   scale: 20
   heightScale: 0.6
   startingPointHeight: 11
-  horizontalStretching: 1.7
+  horizontalStretching: 1
   waypointSmoothingPasses: 4
   roadWidth: 20
   useRandomSeed: 1
@@ -443,8 +443,8 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 282525736}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 7.79}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -17, z: 7.8}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_Children: []
   m_Father: {fileID: 1245702310}
   m_RootOrder: 0
@@ -917,6 +917,26 @@ Prefab:
       propertyPath: playerCanvas
       value: 
       objectReference: {fileID: 1076038188}
+    - target: {fileID: 224369071640640688, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: m_SizeDelta.x
+      value: 140
+      objectReference: {fileID: 0}
+    - target: {fileID: 114834453458855254, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: m_FontData.m_Alignment
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 114834453458855254, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: m_Text
+      value: 00:00.00
+      objectReference: {fileID: 0}
+    - target: {fileID: 224369071640640688, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: m_AnchoredPosition.x
+      value: 6.33
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
   m_IsPrefabAsset: 0
@@ -1117,7 +1137,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1561510782262656, guid: 43629c91e2209bd46b903af497efb8af, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 43629c91e2209bd46b903af497efb8af, type: 2}
@@ -1159,9 +1179,10 @@ MonoBehaviour:
   target: {fileID: 732428369}
   offset: {x: 0, y: 30, z: 0}
   rotationOffset: {x: 0, y: 0, z: 0}
-  matchRotation: 1
+  matchRotation: 0
   rotateY: 1
   maintainHeight: 1
+  absoluteOffset: 1
 --- !u!20 &1245702309
 Camera:
   m_ObjectHideFlags: 0
@@ -1209,7 +1230,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1245702307}
   m_LocalRotation: {x: 0.70710677, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 35, z: 0}
+  m_LocalPosition: {x: 0, y: 35, z: 25}
   m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_Children:
   - {fileID: 282525737}

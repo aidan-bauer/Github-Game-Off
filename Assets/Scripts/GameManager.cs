@@ -59,6 +59,6 @@ public class GameManager : MonoBehaviour {
 
     string FormatTime()
     {
-        return (Mathf.Floor(timer / 60f).ToString("N0") + ":" + (timer % 60f).ToString("N2"));
+        return (Mathf.Floor(timer / 60f).ToString("N0") + ":" + (timer % 60f).ToString("00.##"));
     }
 }

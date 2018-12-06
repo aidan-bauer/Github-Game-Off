@@ -18,7 +18,7 @@ public class Generator : MonoBehaviour {
     [Range(3f, 24f)]
     [Tooltip("Controls how far up the starting point will be generated.")]
     public float startingPointHeight = 4f;
-    [Range(1f, 3f)]
+    [Range(0.1f, 3f)]
     [Tooltip("Controls how straight or winding the course will be. Higher values = more winding course")]
     public float horizontalStretching = 2f;
     [Range(1, 5)]
@@ -491,9 +491,9 @@ public class Generator : MonoBehaviour {
             return new Vector2(Mathf.Abs(point.x), Mathf.Abs(point.y));
         }
 
-        bool IsPointInBounds(Vector2 point)
+        bool IsPointInBounds(Vector2 point, float buffer = 0)
         {
-            return point.x <= dimension && point.y <= dimension && point.x >= 0 && point.y >= 0;
+            return point.x <= dimension - buffer && point.y <= dimension - buffer && point.x >= buffer && point.y >= buffer;
         }
 
         bool IsInXBound(Vector2 point)
@@ -521,7 +521,7 @@ public class Generator : MonoBehaviour {
                 segmentLength = Random.Range(minStep, maxStepRange);
                 Vector2 nextPos = pathPoints[i - 1] + (GenerateRandomPoint() * segmentLength);
 
-                while (!IsPointInBounds(nextPos))
+                while (!IsPointInBounds(nextPos, 5f))
                 {
                     nextPos = pathPoints[i - 1] + (GenerateRandomPoint() * segmentLength);
                 }

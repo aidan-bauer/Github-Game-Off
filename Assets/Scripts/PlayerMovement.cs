@@ -5,6 +5,8 @@ public class PlayerMovement : MonoBehaviour {
 
     public Transform cameraRef;
     public Text gearText, speedText;
+    [Tooltip("Vehicle center of mass. 0 is the ground")]
+    [SerializeField] Vector3 center = Vector3.zero;
     Vector3 resetPos;
     [HideInInspector] public Vector3 ResetPosition
     {
@@ -112,7 +114,7 @@ public class PlayerMovement : MonoBehaviour {
     // Use this for initialization
     void Start () {
         rigid = GetComponent<Rigidbody>();
-        rigid.centerOfMass.Set(0, -1, 0);
+        rigid.centerOfMass = center;
 
         Camera.main.transform.position = cameraRef.position;
         Camera.main.transform.rotation = cameraRef.rotation;
@@ -120,52 +122,55 @@ public class PlayerMovement : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        //controls
-        if (Input.GetKey(controls[0]))
+        if (!PauseManager.IsPaused)
         {
-            gasPress = true;
-            brakePress = false;
-        }
-        else if (Input.GetKey(controls[2]))
-        {
-            gasPress = false;
-            brakePress = true;
-        }
-        else
-        {
-            brakePress = false;
-            gasPress = false;
-        }
+            //controls
+            if (Input.GetKey(controls[0]))
+            {
+                gasPress = true;
+                brakePress = false;
+            }
+            else if (Input.GetKey(controls[2]))
+            {
+                gasPress = false;
+                brakePress = true;
+            }
+            else
+            {
+                brakePress = false;
+                gasPress = false;
+            }
 
-        if (Input.GetKey(controls[1]))
-        {
-            turnAngle = -turnRate;
-            //steerPress = true;
-        }
-        else if (Input.GetKey(controls[3]))
-        {
-            turnAngle = turnRate;
-            //steerPress = true;
-        }
-        else
-        {
-            turnAngle = 0;
-            //steerPress = false;
-        }
+            if (Input.GetKey(controls[1]))
+            {
+                turnAngle = -turnRate;
+                //steerPress = true;
+            }
+            else if (Input.GetKey(controls[3]))
+            {
+                turnAngle = turnRate;
+                //steerPress = true;
+            }
+            else
+            {
+                turnAngle = 0;
+                //steerPress = false;
+            }
 
-        if (Input.GetKeyDown(shifters[0]))
-        {
-            UpShift();
-        }
+            if (Input.GetKeyDown(shifters[0]))
+            {
+                UpShift();
+            }
 
-        if (Input.GetKeyDown(shifters[1]))
-        {
-            DownShift();
-        }
+            if (Input.GetKeyDown(shifters[1]))
+            {
+                DownShift();
+            }
 
-        if (Input.GetKeyDown(reset))
-        {
-            ResetCar();
+            if (Input.GetKeyDown(reset))
+            {
+                ResetCar();
+            }
         }
     }
 
@@ -187,9 +192,11 @@ public class PlayerMovement : MonoBehaviour {
                         axel.leftWheel.motorTorque += gears[currentGear].Acceleration * Time.fixedDeltaTime;
                         axel.rightWheel.motorTorque += gears[currentGear].Acceleration * Time.fixedDeltaTime;
                     }
-
-                    axel.leftWheel.motorTorque = Mathf.Clamp(axel.leftWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
-                    axel.rightWheel.motorTorque = Mathf.Clamp(axel.rightWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
+                    else
+                    {
+                        axel.leftWheel.motorTorque += gears[currentGear].TopSpeed;
+                        axel.rightWheel.motorTorque += gears[currentGear].TopSpeed;
+                    }
                 }
                 /*else if (brakePress)
                 {
@@ -236,6 +243,9 @@ public class PlayerMovement : MonoBehaviour {
                 axel.leftWheel.brakeTorque = brakeForce;
                 axel.rightWheel.brakeTorque = brakeForce;
             }
+
+            axel.leftWheel.motorTorque = Mathf.Clamp(axel.leftWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
+            axel.rightWheel.motorTorque = Mathf.Clamp(axel.rightWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
 
             //anti-roll bars
             //assigning variables here so each axel get its own values
