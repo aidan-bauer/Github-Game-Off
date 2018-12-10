@@ -24,19 +24,25 @@ public class PlayerMovement : MonoBehaviour {
     public KeyCode[] shifters = new KeyCode[] {
         KeyCode.UpArrow, KeyCode.DownArrow
     };
-    public KeyCode reset = KeyCode.R;
+    public KeyCode reverse = KeyCode.R;
+    public KeyCode reset = KeyCode.F;
 
     public AxelInfo[] axels;
     public GearInfo[] gears = new GearInfo[] {
-        new GearInfo(-25f, -60f, "R"),    //reverse
-        new GearInfo(0f, 0f, "N"),
-        new GearInfo(30f, 100f, "1"),
-        new GearInfo(65f, 160f, "2"),
-        new GearInfo(100f, 250f, "3"),
-        new GearInfo(150f, 375f, "4")
+        new GearInfo(2.833f, "R"),    //reverse
+        new GearInfo(3f, "1"),
+        new GearInfo(2.125f, "2"),
+        new GearInfo(1.611f, "3"),
+        new GearInfo(1.316f, "4"),
+        new GearInfo(1.118f, "5"),
+        new GearInfo(0.96f, "6")
     };
     public int currentGear = 1;
-    public float gasForce = 50f;
+    public float engineTorque = 500f;
+    public float maxEngineRPM = 3000f;
+    public float minEngineRPM = 1000f;
+    float engineRPM = 0f;
+    int gas = 0;
     public float brakeForce = 75f;
     public float maxSteerAngle = 20f;
     public int turnRate = 2;
@@ -157,16 +163,6 @@ public class PlayerMovement : MonoBehaviour {
                 //steerPress = false;
             }
 
-            if (Input.GetKeyDown(shifters[0]))
-            {
-                UpShift();
-            }
-
-            if (Input.GetKeyDown(shifters[1]))
-            {
-                DownShift();
-            }
-
             if (Input.GetKeyDown(reset))
             {
                 ResetCar();
@@ -176,107 +172,108 @@ public class PlayerMovement : MonoBehaviour {
 
     private void FixedUpdate()
     {
-        foreach (AxelInfo axel in axels)
+        if (!PauseManager.IsPaused)
         {
-            //apply key presses to accel/decel
-            if (axel.power)
-            {
-                if (gasPress)
-                {
-                    axel.leftWheel.brakeTorque = 0f;
-                    axel.rightWheel.brakeTorque = 0f;
+            engineRPM = (axels[1].leftWheel.rpm + axels[1].rightWheel.rpm) / 2f * gears[currentGear].GearRatio;
 
-                    //power
-                    if (axel.leftWheel.motorTorque <= gears[currentGear].TopSpeed)
+            foreach (AxelInfo axel in axels)
+            {
+                //engineRPM = (axel.leftWheel.rpm + axel.rightWheel.rpm) / 2f * gears[currentGear].GearRatio;
+
+                //apply key presses to accel/decel
+                if (axel.power)
+                {
+                    if (gasPress)
                     {
-                        axel.leftWheel.motorTorque += gears[currentGear].Acceleration * Time.fixedDeltaTime;
-                        axel.rightWheel.motorTorque += gears[currentGear].Acceleration * Time.fixedDeltaTime;
+                        //power
+                        axel.leftWheel.brakeTorque = 0f;
+                        axel.rightWheel.brakeTorque = 0f;
+
+                        gas = 1;
+
+                        //for reverse to go backwards
+                        if (Input.GetKey(reverse))
+                        {
+                            gas = -1;
+                            currentGear = 0;
+                        }
                     }
                     else
                     {
-                        axel.leftWheel.motorTorque += gears[currentGear].TopSpeed;
-                        axel.rightWheel.motorTorque += gears[currentGear].TopSpeed;
+                        axel.leftWheel.brakeTorque = 0f;
+                        axel.rightWheel.brakeTorque = 0f;
+
+                        axel.leftWheel.motorTorque = 0f;
+                        axel.rightWheel.motorTorque = 0f;
+                        gas = 0;
                     }
+
+                    axel.leftWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
+                    axel.rightWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
                 }
-                /*else if (brakePress)
+
+                //apply steering controls info
+                if (axel.steering)
+                {
+                    /*if (axel.leftWheel.steerAngle <= maxSteerAngle)
+                    {
+                        axel.leftWheel.steerAngle += turnRate * Time.fixedDeltaTime;
+                        axel.rightWheel.steerAngle += turnRate * Time.fixedDeltaTime;
+                    }
+
+                    axel.leftWheel.steerAngle = Mathf.Clamp(axel.leftWheel.steerAngle, 0f, maxSteerAngle);
+                    axel.rightWheel.steerAngle = Mathf.Clamp(axel.rightWheel.steerAngle, 0f, maxSteerAngle);*/
+
+                    //if steer key pressed turn the wheel
+                    //when key is released return wheel to neutral position
+
+                    axel.leftWheel.steerAngle = maxSteerAngle * turnAngle;
+                    axel.rightWheel.steerAngle = maxSteerAngle * turnAngle;
+                }
+
+                if (brakePress)
                 {
                     axel.leftWheel.motorTorque = 0f;
                     axel.rightWheel.motorTorque = 0f;
 
                     axel.leftWheel.brakeTorque = brakeForce;
                     axel.rightWheel.brakeTorque = brakeForce;
-                }*/
+                }
+
+                //determine what gear we should be in
+                AutoShift();
+
+                //anti-roll bars
+                //assigning variables here so each axel get its own values
+                WheelHit leftHit, rightHit;
+                float travelLeft, travelRight, antiRollForce;
+
+                bool groundedLeft = axel.leftWheel.GetGroundHit(out leftHit);
+                bool groundedRight = axel.rightWheel.GetGroundHit(out rightHit);
+
+                if (groundedLeft)
+                    travelLeft = (-axel.leftWheel.transform.InverseTransformPoint(leftHit.point).y - axel.leftWheel.radius) / axel.leftWheel.suspensionDistance;
                 else
-                {
-                    axel.leftWheel.brakeTorque = 0f;
-                    axel.rightWheel.brakeTorque = 0f;
+                    travelLeft = 1.0f;
 
-                    axel.leftWheel.motorTorque = 0f;
-                    axel.rightWheel.motorTorque = 0f;
-                }
+                if (groundedRight)
+                    travelRight = (-axel.rightWheel.transform.InverseTransformPoint(rightHit.point).y - axel.rightWheel.radius) / axel.rightWheel.suspensionDistance;
+                else
+                    travelRight = 1.0f;
+
+                antiRollForce = (travelLeft - travelRight) * antiRoll;
+
+                if (groundedLeft)
+                    rigid.AddForceAtPosition(Vector3.up * -antiRollForce, axel.leftWheel.transform.position);
+                if (groundedRight)
+                    rigid.AddForceAtPosition(Vector3.up * antiRollForce, axel.rightWheel.transform.position);
+
+                updateVisualWheels(axel.leftWheel);
+                updateVisualWheels(axel.rightWheel);
             }
 
-            //apply steering controls info
-            if (axel.steering)
-            {
-                /*if (axel.leftWheel.steerAngle <= maxSteerAngle)
-                {
-                    axel.leftWheel.steerAngle += turnRate * Time.fixedDeltaTime;
-                    axel.rightWheel.steerAngle += turnRate * Time.fixedDeltaTime;
-                }
-
-                axel.leftWheel.steerAngle = Mathf.Clamp(axel.leftWheel.steerAngle, 0f, maxSteerAngle);
-                axel.rightWheel.steerAngle = Mathf.Clamp(axel.rightWheel.steerAngle, 0f, maxSteerAngle);*/
-
-                //if steer key pressed turn the wheel
-                //when key is released return wheel to neutral position
-
-                axel.leftWheel.steerAngle = maxSteerAngle * turnAngle;
-                axel.rightWheel.steerAngle = maxSteerAngle * turnAngle;
-            }
-
-            if (brakePress)
-            {
-                axel.leftWheel.motorTorque = 0f;
-                axel.rightWheel.motorTorque = 0f;
-
-                axel.leftWheel.brakeTorque = brakeForce;
-                axel.rightWheel.brakeTorque = brakeForce;
-            }
-
-            axel.leftWheel.motorTorque = Mathf.Clamp(axel.leftWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
-            axel.rightWheel.motorTorque = Mathf.Clamp(axel.rightWheel.motorTorque, 0f, gears[currentGear].TopSpeed);
-
-            //anti-roll bars
-            //assigning variables here so each axel get its own values
-            WheelHit leftHit, rightHit;
-            float travelLeft, travelRight, antiRollForce;
-
-            bool groundedLeft = axel.leftWheel.GetGroundHit(out leftHit);
-            bool groundedRight = axel.rightWheel.GetGroundHit(out rightHit);
-
-            if (groundedLeft)
-                travelLeft = (-axel.leftWheel.transform.InverseTransformPoint(leftHit.point).y - axel.leftWheel.radius) / axel.leftWheel.suspensionDistance;
-            else
-                travelLeft = 1.0f;
-
-            if (groundedRight)
-                travelRight = (-axel.rightWheel.transform.InverseTransformPoint(rightHit.point).y - axel.rightWheel.radius) / axel.rightWheel.suspensionDistance;
-            else
-                travelRight = 1.0f;
-
-            antiRollForce = (travelLeft - travelRight) * antiRoll;
-
-            if (groundedLeft)
-                rigid.AddForceAtPosition(Vector3.up * -antiRollForce, axel.leftWheel.transform.position);
-            if (groundedRight)
-                rigid.AddForceAtPosition(Vector3.up * antiRollForce, axel.rightWheel.transform.position);
-
-            updateVisualWheels(axel.leftWheel);
-            updateVisualWheels(axel.rightWheel);
+            speedText.text = (rigid.velocity.magnitude * 2.237f).ToString();
         }
-
-        speedText.text = (rigid.velocity.magnitude * 2.237f).ToString();
     }
 
     void updateVisualWheels(WheelCollider collider)
@@ -295,6 +292,54 @@ public class PlayerMovement : MonoBehaviour {
 
         visualWheel.transform.position = position;
         visualWheel.transform.rotation = rotation;
+    }
+
+    void AutoShift()
+    {
+        //Checks to make sure what gear the car should be in. Loops through all gears, finds one that will fall within the max or min RPM,
+        //then changes to that gear.
+        if (engineRPM >= maxEngineRPM)
+        {
+            Debug.Log("changing gear");
+            int appropriateGear = currentGear;
+
+            for (int i = 1; i < gears.Length; i++)
+            {
+                if (axels[1].leftWheel.rpm * gears[i].GearRatio < maxEngineRPM)
+                {
+                    appropriateGear = i;
+                    break;
+                }
+            }
+
+            ChangeGear(appropriateGear);
+            //currentGear = appropriateGear;
+            //gearText.text = gears[currentGear].GearName;
+        }
+
+        if (engineRPM <= minEngineRPM)
+        {
+            int appropriateGear = currentGear;
+
+            for (int i = 1; i < gears.Length; i++)
+            {
+                if (axels[1].leftWheel.rpm * gears[i].GearRatio > minEngineRPM)
+                {
+                    appropriateGear = i;
+                    break;
+                }
+            }
+
+            ChangeGear(appropriateGear);
+            //currentGear = appropriateGear;
+            //gearText.text = gears[currentGear].GearName;
+        }
+    }
+
+    void ChangeGear(int gear)
+    {
+        currentGear = gear;
+        gearText.text = gears[currentGear].GearName;
     }
 
     void UpShift()
@@ -331,11 +376,20 @@ public class PlayerMovement : MonoBehaviour {
 [System.Serializable]
 public class GearInfo
 {
-    [SerializeField] float acceleration;
-    [SerializeField] float topSpeed;
+    [SerializeField] float gearRatio;
+    /*[SerializeField] float acceleration;
+    [SerializeField] float topSpeed;*/
     [SerializeField] string gearName;
 
-    public float TopSpeed {
+    public float GearRatio
+    {
+        get
+        {
+            return gearRatio;
+        }
+    }
+
+    /*public float TopSpeed {
         get {
             return topSpeed;
         }
@@ -347,7 +401,7 @@ public class GearInfo
         {
             return acceleration;
         }
-    }
+    }*/
 
     public string GearName
     {
@@ -357,10 +411,11 @@ public class GearInfo
         }
     }
 
-    public GearInfo(float _acceleration, float _topSpeed, string _gearName)
+    public GearInfo(float _gearRatio/*float _acceleration, float _topSpeed*/, string _gearName)
     {
-        acceleration = _acceleration;
-        topSpeed = _topSpeed;
+        gearRatio = _gearRatio;
+        /*acceleration = _acceleration;
+        topSpeed = _topSpeed;*/
         gearName = _gearName;
     }
 }

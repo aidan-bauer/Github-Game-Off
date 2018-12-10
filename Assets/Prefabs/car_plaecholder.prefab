@@ -713,7 +713,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1609346276158908}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4441658808098792}
@@ -1291,7 +1291,8 @@ MonoBehaviour:
   controls: 77000000610000007300000064000000
   handBreak: 32
   shifters: 1101000012010000
-  reset: 114
+  reverse: 114
+  reset: 102
   axels:
   - leftWheel: {fileID: 146568904988683382}
     rightWheel: {fileID: 146428165871091502}
@@ -1302,22 +1303,25 @@ MonoBehaviour:
     steering: 0
     power: 1
   gears:
-  - acceleration: -150
-    topSpeed: -170
+  - gearRatio: 2.833
     gearName: R
-  - acceleration: 80
-    topSpeed: 85
+  - gearRatio: 3
     gearName: 1
-  - acceleration: 65
-    topSpeed: 110
+  - gearRatio: 2.125
     gearName: 2
-  - acceleration: 45
-    topSpeed: 160
+  - gearRatio: 1.611
     gearName: 3
-  - acceleration: 25
-    topSpeed: 220
+  - gearRatio: 1.316
+    gearName: 4
+  - gearRatio: 1.118
+    gearName: 4
+  - gearRatio: 0.96
     gearName: 4
   currentGear: 1
+  engineTorque: 300
+  maxEngineRPM: 1300
+  minEngineRPM: 500
+  engineRPM: 0
   gasForce: 100
   brakeForce: 350
   maxSteerAngle: 30
