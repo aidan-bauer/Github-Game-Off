@@ -4,7 +4,7 @@ using UnityEngine.UI;
 public class PlayerMovement : MonoBehaviour {
 
     public Transform cameraRef;
-    public Text gearText, speedText;
+    public Text gearText, speedText, resetText;
     [Tooltip("Vehicle center of mass. 0 is the ground")]
     [SerializeField] Vector3 center = Vector3.zero;
     Vector3 resetPos;
@@ -24,8 +24,7 @@ public class PlayerMovement : MonoBehaviour {
     public KeyCode[] shifters = new KeyCode[] {
         KeyCode.UpArrow, KeyCode.DownArrow
     };
-    public KeyCode reverse = KeyCode.R;
-    public KeyCode reset = KeyCode.F;
+    public KeyCode reset = KeyCode.R;
 
     public AxelInfo[] axels;
     public GearInfo[] gears = new GearInfo[] {
@@ -37,6 +36,7 @@ public class PlayerMovement : MonoBehaviour {
         new GearInfo(1.118f, "5"),
         new GearInfo(0.96f, "6")
     };
+
     public int currentGear = 1;
     public float engineTorque = 500f;
     public float maxEngineRPM = 3000f;
@@ -167,6 +167,17 @@ public class PlayerMovement : MonoBehaviour {
             {
                 ResetCar();
             }
+
+            //detect if the car is about to be on its roof
+            if (transform.rotation.eulerAngles.z >= 110 && transform.rotation.eulerAngles.z <= 250)
+            {
+                resetText.gameObject.SetActive(true);
+                //resetText.enabled = true;
+            } else
+            {
+                resetText.gameObject.SetActive(false);
+                //resetText.enabled = false;
+            }
         }
     }
 
@@ -174,12 +185,11 @@ public class PlayerMovement : MonoBehaviour {
     {
         if (!PauseManager.IsPaused)
         {
+            //get rpm from back tires, as 99% of the time they'll be providing the power
             engineRPM = (axels[1].leftWheel.rpm + axels[1].rightWheel.rpm) / 2f * gears[currentGear].GearRatio;
 
             foreach (AxelInfo axel in axels)
             {
-                //engineRPM = (axel.leftWheel.rpm + axel.rightWheel.rpm) / 2f * gears[currentGear].GearRatio;
-
                 //apply key presses to accel/decel
                 if (axel.power)
                 {
@@ -190,13 +200,6 @@ public class PlayerMovement : MonoBehaviour {
                         axel.rightWheel.brakeTorque = 0f;
 
                         gas = 1;
-
-                        //for reverse to go backwards
-                        if (Input.GetKey(reverse))
-                        {
-                            gas = -1;
-                            currentGear = 0;
-                        }
                     }
                     else
                     {
@@ -233,11 +236,20 @@ public class PlayerMovement : MonoBehaviour {
 
                 if (brakePress)
                 {
-                    axel.leftWheel.motorTorque = 0f;
-                    axel.rightWheel.motorTorque = 0f;
+                    //if we're slow enough, start backing up
+                    if (engineRPM <= 10f)
+                    {
+                        Debug.Log("reversing");
+                        gas = -1;
+                        ChangeGear(0);
 
-                    axel.leftWheel.brakeTorque = brakeForce;
-                    axel.rightWheel.brakeTorque = brakeForce;
+                        axel.leftWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
+                        axel.rightWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
+                    } else
+                    {
+                        axel.leftWheel.brakeTorque = brakeForce;
+                        axel.rightWheel.brakeTorque = brakeForce;
+                    }
                 }
 
                 //determine what gear we should be in
