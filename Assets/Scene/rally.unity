@@ -302,10 +302,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dimension: 129
   numPathPoints: 15
-  courseDetail: 20
+  courseDetail: 15
   minStep: 10
-  stepRange: 20
-  chaikinPasses: 4
+  stepRange: 25
+  chaikinPasses: 5
   scale: 30
   heightScale: 0.6
   startingPointHeight: 11
