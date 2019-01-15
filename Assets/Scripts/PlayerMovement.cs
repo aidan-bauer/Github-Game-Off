@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour {
 
     public Transform cameraRef;
-    public Text gearText, speedText, resetText;
+    public Text gearText, speedText, rpmText, resetText;
     [Tooltip("Vehicle center of mass. 0 is the ground")]
     [SerializeField] Vector3 center = Vector3.zero;
     Vector3 resetPos;
@@ -76,11 +77,18 @@ public class PlayerMovement : MonoBehaviour {
     public float sidewaysAsymptoteValue = 0.75f;
     [Range(0f, 1f)]
     public float sidewaysStiffness = 1f;
+    [SerializeField] ParticleSystem trails;
+    [SerializeField] Gradient trailColor;
 
     bool gasPress, brakePress/*, steerPress*/;
+    bool shifting;
     float turnAngle;
     
     Rigidbody rigid;
+    ParticleSystem.EmissionModule newEmission;
+    ParticleSystem.MainModule newMain;
+    ParticleSystem.EmissionModule[] tireDustEmissions;
+    ParticleSystem.MainModule[] tireDustMains;
 
     private void Awake()
     {
@@ -115,6 +123,24 @@ public class PlayerMovement : MonoBehaviour {
             axel.rightWheel.forwardFriction = forward;
             axel.rightWheel.sidewaysFriction = sideways;
         }
+
+        tireDustEmissions = new ParticleSystem.EmissionModule[axels.Length * 2];
+        tireDustMains = new ParticleSystem.MainModule[axels.Length * 2];
+
+        newEmission = trails.emission;
+        newEmission.rateOverTime = 0;
+        tireDustEmissions[0] = axels[0].leftDust.emission;
+        tireDustEmissions[1] = axels[0].rightDust.emission;
+        tireDustEmissions[2] = axels[1].leftDust.emission;
+        tireDustEmissions[3] = axels[1].rightDust.emission;
+        //newEmission.rateOverTime = 0;
+
+        newMain = trails.main;
+        newMain.startSpeed = 0;
+        tireDustMains[0] = axels[0].leftDust.main;
+        tireDustMains[1] = axels[0].rightDust.main;
+        tireDustMains[2] = axels[1].leftDust.main;
+        tireDustMains[3] = axels[1].rightDust.main;
     }
 
     // Use this for initialization
@@ -124,6 +150,12 @@ public class PlayerMovement : MonoBehaviour {
 
         Camera.main.transform.position = cameraRef.position;
         Camera.main.transform.rotation = cameraRef.rotation;
+
+        foreach (AxelInfo axel in axels)
+        {
+            axel.leftWheel.brakeTorque = brakeForce;
+            axel.rightWheel.brakeTorque = brakeForce;
+        }
     }
 	
 	// Update is called once per frame
@@ -135,16 +167,20 @@ public class PlayerMovement : MonoBehaviour {
             {
                 gasPress = true;
                 brakePress = false;
+                //trails.Emit(30);
+                //trails.Play();
             }
             else if (Input.GetKey(controls[2]))
             {
                 gasPress = false;
                 brakePress = true;
+                //trails.Stop();
             }
             else
             {
                 brakePress = false;
                 gasPress = false;
+                //trails.Stop();
             }
 
             if (Input.GetKey(controls[1]))
@@ -178,6 +214,40 @@ public class PlayerMovement : MonoBehaviour {
                 resetText.gameObject.SetActive(false);
                 //resetText.enabled = false;
             }
+
+            //trails particle stystem;
+            if(Input.GetKeyDown(controls[0]))
+            {
+                trails.Play();
+
+                /*foreach (AxelInfo axel in axels)
+                {
+                    axel.leftDust.Play();
+                    axel.rightDust.Play();
+                }*/
+            }
+
+            if (Input.GetKeyUp(controls[0]))
+            {
+                trails.Stop();
+
+                /*foreach (AxelInfo axel in axels)
+                {
+                    axel.leftDust.Stop();
+                    axel.rightDust.Stop();
+                }*/
+            }
+
+            if (gasPress /*&& currentGear > 1*/)
+            {
+                //taillight trails
+                int particleRate = (int)rigid.velocity.magnitude * currentGear;
+                particleRate = Mathf.Clamp(particleRate, 0, 250);
+                newMain.startColor = trailColor.Evaluate(Mathf.Clamp01(rigid.velocity.magnitude * 2.237f / 90f));
+                newEmission.rateOverTime = particleRate;
+                //newMain.startSpeed = -rigid.velocity.magnitude * 2.237f * 0.5f;
+                //newMain.startSpeed = -rigid.velocity.magnitude;
+            }
         }
     }
 
@@ -200,6 +270,12 @@ public class PlayerMovement : MonoBehaviour {
                         axel.rightWheel.brakeTorque = 0f;
 
                         gas = 1;
+
+                        //tire dust particles
+                        for (int i = 0; i < tireDustEmissions.Length;  i++)
+                        {
+                            tireDustEmissions[i].rateOverTime = engineRPM / 10f;
+                        }
                     }
                     else
                     {
@@ -213,6 +289,10 @@ public class PlayerMovement : MonoBehaviour {
 
                     axel.leftWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
                     axel.rightWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
+                } else
+                {
+                    axel.leftWheel.brakeTorque = 0f;
+                    axel.rightWheel.brakeTorque = 0f;
                 }
 
                 //apply steering controls info
@@ -239,7 +319,7 @@ public class PlayerMovement : MonoBehaviour {
                     //if we're slow enough, start backing up
                     if (engineRPM <= 10f)
                     {
-                        Debug.Log("reversing");
+                        //Debug.Log("reversing");
                         gas = -1;
                         ChangeGear(0);
 
@@ -282,9 +362,16 @@ public class PlayerMovement : MonoBehaviour {
 
                 updateVisualWheels(axel.leftWheel);
                 updateVisualWheels(axel.rightWheel);
+
+                //tire dust particles
+                if (gasPress)
+                {
+                    //axel.leftDust.rate
+                }
             }
 
             speedText.text = (rigid.velocity.magnitude * 2.237f).ToString();
+            rpmText.text = Mathf.Abs(engineRPM).ToString("000");
         }
     }
 
@@ -310,62 +397,61 @@ public class PlayerMovement : MonoBehaviour {
     {
         //Checks to make sure what gear the car should be in. Loops through all gears, finds one that will fall within the max or min RPM,
         //then changes to that gear.
-        if (engineRPM >= maxEngineRPM)
+        if (!shifting)
         {
-            Debug.Log("changing gear");
-            int appropriateGear = currentGear;
-
-            for (int i = 1; i < gears.Length; i++)
+            if (engineRPM >= maxEngineRPM)
             {
-                if (axels[1].leftWheel.rpm * gears[i].GearRatio < maxEngineRPM)
+                Debug.Log("changing gear");
+                int appropriateGear = currentGear;
+
+                for (int i = 1; i < gears.Length; i++)
                 {
-                    appropriateGear = i;
-                    break;
+                    if (axels[1].leftWheel.rpm * gears[i].GearRatio < maxEngineRPM)
+                    {
+                        Debug.Log("upshift");
+                        appropriateGear = i;
+                        StartCoroutine(ChangeGear(appropriateGear));
+                        break;
+                    }
                 }
+
+                //StartCoroutine(ChangeGear(appropriateGear));
+                //ChangeGear(appropriateGear);
             }
 
-            ChangeGear(appropriateGear);
-            //currentGear = appropriateGear;
-            //gearText.text = gears[currentGear].GearName;
-        }
-
-        if (engineRPM <= minEngineRPM)
-        {
-            int appropriateGear = currentGear;
-
-            for (int i = 1; i < gears.Length; i++)
+            if (engineRPM <= minEngineRPM)
             {
-                if (axels[1].leftWheel.rpm * gears[i].GearRatio > minEngineRPM)
-                {
-                    appropriateGear = i;
-                    break;
-                }
-            }
+                int appropriateGear = currentGear;
 
-            ChangeGear(appropriateGear);
-            //currentGear = appropriateGear;
-            //gearText.text = gears[currentGear].GearName;
+                for (int i = 1; i < gears.Length; i++)
+                {
+                    if (axels[1].leftWheel.rpm * gears[i].GearRatio > minEngineRPM)
+                    {
+                        appropriateGear = i;
+                        StartCoroutine(ChangeGear(appropriateGear));
+                        break;
+                    }
+                }
+
+                //StartCoroutine(ChangeGear(appropriateGear));
+                //ChangeGear(appropriateGear);
+            }
         }
     }
 
-    void ChangeGear(int gear)
+    /*void ChangeGear(int gear)
     {
         currentGear = gear;
         gearText.text = gears[currentGear].GearName;
-    }
+    }*/
 
-    void UpShift()
+    IEnumerator ChangeGear(int gear)
     {
-        if (currentGear < gears.Length - 1)
-            currentGear++;
+        shifting = true;
+        yield return new WaitForSeconds(1f);
+        currentGear = gear;
         gearText.text = gears[currentGear].GearName;
-    }
-
-    void DownShift()
-    {
-        if (currentGear > 0)
-            currentGear--;
-        gearText.text = gears[currentGear].GearName;
+        shifting = false;
     }
 
     public void ResetCar()
@@ -376,12 +462,6 @@ public class PlayerMovement : MonoBehaviour {
         transform.rotation = resetRot;
         rigid.velocity = Vector3.zero;
     }
-
-    //update wheels at start with editor information
-    void UpdateWheels()
-    {
-
-    }
 }
 
 
@@ -389,8 +469,6 @@ public class PlayerMovement : MonoBehaviour {
 public class GearInfo
 {
     [SerializeField] float gearRatio;
-    /*[SerializeField] float acceleration;
-    [SerializeField] float topSpeed;*/
     [SerializeField] string gearName;
 
     public float GearRatio
@@ -401,20 +479,6 @@ public class GearInfo
         }
     }
 
-    /*public float TopSpeed {
-        get {
-            return topSpeed;
-        }
-    }
-
-    public float Acceleration
-    {
-        get
-        {
-            return acceleration;
-        }
-    }*/
-
     public string GearName
     {
         get
@@ -423,11 +487,9 @@ public class GearInfo
         }
     }
 
-    public GearInfo(float _gearRatio/*float _acceleration, float _topSpeed*/, string _gearName)
+    public GearInfo(float _gearRatio, string _gearName)
     {
         gearRatio = _gearRatio;
-        /*acceleration = _acceleration;
-        topSpeed = _topSpeed;*/
         gearName = _gearName;
     }
 }

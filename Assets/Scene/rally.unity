@@ -90,7 +90,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -301,14 +301,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dimension: 129
-  numPathPoints: 15
+  numPathPoints: 20
   courseDetail: 15
   minStep: 10
   stepRange: 25
   chaikinPasses: 5
-  scale: 30
+  scale: 20
   heightScale: 0.6
-  startingPointHeight: 11
+  startingPointHeight: 4
   horizontalStretching: 1
   waypointSmoothingPasses: 4
   roadWidth: 20
@@ -495,11 +495,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &453454069 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1841711686559152, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-    type: 2}
-  m_PrefabInternal: {fileID: 812022974}
 --- !u!1 &502851996
 GameObject:
   m_ObjectHideFlags: 0
@@ -729,16 +724,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 111707715099470630, guid: b4340475cdfb7e24cbc8be56757dd294,
-        type: 2}
-      propertyPath: m_Animation
-      value: 
-      objectReference: {fileID: 7400000, guid: 15a8ecdfecaaa9541ae47010b31e5c74, type: 2}
-    - target: {fileID: 114349150612059092, guid: b4340475cdfb7e24cbc8be56757dd294,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b4340475cdfb7e24cbc8be56757dd294, type: 2}
   m_IsPrefabAsset: 0
@@ -872,16 +857,16 @@ Prefab:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 1157342228}
-    - target: {fileID: 114211949182707150, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+    - target: {fileID: 114408542053368906, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
         type: 2}
-      propertyPath: timerCanvas
-      value: 
-      objectReference: {fileID: 453454069}
-    - target: {fileID: 114211949182707150, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: PlayerCanvas
+      propertyPath: playerCanvas
       value: 
       objectReference: {fileID: 1076038188}
+    - target: {fileID: 114408542053368906, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: minimap
+      value: 
+      objectReference: {fileID: 2068139857}
     - target: {fileID: 114211949182707150, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
         type: 2}
       propertyPath: playerCanvas
@@ -892,61 +877,6 @@ Prefab:
       propertyPath: minimap
       value: 
       objectReference: {fileID: 2068139857}
-    - target: {fileID: 114527491369101638, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_RaycastTarget
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114176192151853332, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_RaycastTarget
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114536632440194740, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_RaycastTarget
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114779095920366190, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_RaycastTarget
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114351796131213876, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_RaycastTarget
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114408542053368906, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: minimap
-      value: 
-      objectReference: {fileID: 2068139857}
-    - target: {fileID: 114408542053368906, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: playerCanvas
-      value: 
-      objectReference: {fileID: 1076038188}
-    - target: {fileID: 224369071640640688, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 140
-      objectReference: {fileID: 0}
-    - target: {fileID: 114834453458855254, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_FontData.m_Alignment
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 114834453458855254, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_Text
-      value: 00:00.00
-      objectReference: {fileID: 0}
-    - target: {fileID: 224369071640640688, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
-        type: 2}
-      propertyPath: m_AnchoredPosition.x
-      value: 6.33
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
   m_IsPrefabAsset: 0
