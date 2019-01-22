@@ -7,7 +7,7 @@ public class Checkpoint : MonoBehaviour {
         if (other.CompareTag("Player"))
         {
             PlayerMovement playerMovement = GetComponent<PlayerMovement>();
-            playerMovement.ResetPosition = transform.position;
+            playerMovement.ResetPosition = transform.position + Vector3.up;
         }
     }
 }

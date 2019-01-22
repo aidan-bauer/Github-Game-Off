@@ -90,7 +90,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -300,15 +300,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73e76780d4346bd4b9db0f99e213d51a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dimension: 129
-  numPathPoints: 20
+  dimension: 65
+  numPathPoints: 15
   courseDetail: 15
-  minStep: 10
+  minStep: 15
   stepRange: 25
   chaikinPasses: 5
   scale: 20
   heightScale: 0.6
-  startingPointHeight: 4
+  startingPointHeight: 10
   horizontalStretching: 1
   waypointSmoothingPasses: 4
   roadWidth: 20
@@ -724,6 +724,31 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 114372498623869800, guid: b4340475cdfb7e24cbc8be56757dd294,
+        type: 2}
+      propertyPath: waypoint
+      value: 
+      objectReference: {fileID: 502851997}
+    - target: {fileID: 146428165871091502, guid: b4340475cdfb7e24cbc8be56757dd294,
+        type: 2}
+      propertyPath: m_WheelDampingRate
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 146540816565047902, guid: b4340475cdfb7e24cbc8be56757dd294,
+        type: 2}
+      propertyPath: m_WheelDampingRate
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 146568904988683382, guid: b4340475cdfb7e24cbc8be56757dd294,
+        type: 2}
+      propertyPath: m_WheelDampingRate
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 146026140683632902, guid: b4340475cdfb7e24cbc8be56757dd294,
+        type: 2}
+      propertyPath: m_WheelDampingRate
+      value: 0.1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b4340475cdfb7e24cbc8be56757dd294, type: 2}
   m_IsPrefabAsset: 0
@@ -856,7 +881,7 @@ Prefab:
         type: 2}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
-      objectReference: {fileID: 1157342228}
+      objectReference: {fileID: 1207559439}
     - target: {fileID: 114408542053368906, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
         type: 2}
       propertyPath: playerCanvas
@@ -877,6 +902,32 @@ Prefab:
       propertyPath: minimap
       value: 
       objectReference: {fileID: 2068139857}
+    - target: {fileID: 1248179949089824, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1969677334735254, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1648428320207276, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1381216089304052, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114144767605382480, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: ResetToStart
+      objectReference: {fileID: 0}
+    - target: {fileID: 114144767605382480, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669,
+        type: 2}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7bc1ba3a103ed6d4090bb4bc1ef71669, type: 2}
   m_IsPrefabAsset: 0
@@ -1088,6 +1139,12 @@ MonoBehaviour:
     type: 2}
   m_PrefabInternal: {fileID: 1157342227}
   m_Script: {fileID: 11500000, guid: 8127dcd76871e6e4f9bd9f578a81460d, type: 3}
+--- !u!114 &1207559439 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114116739755553772, guid: b4340475cdfb7e24cbc8be56757dd294,
+    type: 2}
+  m_PrefabInternal: {fileID: 732428368}
+  m_Script: {fileID: 11500000, guid: 1beb9300e22f421459d00e6807aeae08, type: 3}
 --- !u!1 &1245702307
 GameObject:
   m_ObjectHideFlags: 0

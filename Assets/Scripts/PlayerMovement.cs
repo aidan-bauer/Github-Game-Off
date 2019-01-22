@@ -9,11 +9,20 @@ public class PlayerMovement : MonoBehaviour {
     [Tooltip("Vehicle center of mass. 0 is the ground")]
     [SerializeField] Vector3 center = Vector3.zero;
     Vector3 resetPos;
+    Quaternion resetRot;
     [HideInInspector] public Vector3 ResetPosition
     {
         set
         {
             resetPos = value;
+        }
+    }
+
+    [HideInInspector] public Quaternion ResetRotation
+    {
+        set
+        {
+            resetRot = value;
         }
     }
 
@@ -199,20 +208,18 @@ public class PlayerMovement : MonoBehaviour {
                 //steerPress = false;
             }
 
-            if (Input.GetKeyDown(reset))
+            /*if (Input.GetKeyDown(reset))
             {
                 ResetCar();
-            }
+            }*/
 
             //detect if the car is about to be on its roof
             if (transform.rotation.eulerAngles.z >= 110 && transform.rotation.eulerAngles.z <= 250)
             {
                 resetText.gameObject.SetActive(true);
-                //resetText.enabled = true;
             } else
             {
                 resetText.gameObject.SetActive(false);
-                //resetText.enabled = false;
             }
 
             //trails particle stystem;
@@ -272,10 +279,10 @@ public class PlayerMovement : MonoBehaviour {
                         gas = 1;
 
                         //tire dust particles
-                        for (int i = 0; i < tireDustEmissions.Length;  i++)
+                        /*for (int i = 0; i < tireDustEmissions.Length;  i++)
                         {
                             tireDustEmissions[i].rateOverTime = engineRPM / 10f;
-                        }
+                        }*/
                     }
                     else
                     {
@@ -298,15 +305,6 @@ public class PlayerMovement : MonoBehaviour {
                 //apply steering controls info
                 if (axel.steering)
                 {
-                    /*if (axel.leftWheel.steerAngle <= maxSteerAngle)
-                    {
-                        axel.leftWheel.steerAngle += turnRate * Time.fixedDeltaTime;
-                        axel.rightWheel.steerAngle += turnRate * Time.fixedDeltaTime;
-                    }
-
-                    axel.leftWheel.steerAngle = Mathf.Clamp(axel.leftWheel.steerAngle, 0f, maxSteerAngle);
-                    axel.rightWheel.steerAngle = Mathf.Clamp(axel.rightWheel.steerAngle, 0f, maxSteerAngle);*/
-
                     //if steer key pressed turn the wheel
                     //when key is released return wheel to neutral position
 
@@ -319,7 +317,6 @@ public class PlayerMovement : MonoBehaviour {
                     //if we're slow enough, start backing up
                     if (engineRPM <= 10f)
                     {
-                        //Debug.Log("reversing");
                         gas = -1;
                         ChangeGear(0);
 
@@ -362,12 +359,6 @@ public class PlayerMovement : MonoBehaviour {
 
                 updateVisualWheels(axel.leftWheel);
                 updateVisualWheels(axel.rightWheel);
-
-                //tire dust particles
-                if (gasPress)
-                {
-                    //axel.leftDust.rate
-                }
             }
 
             speedText.text = (rigid.velocity.magnitude * 2.237f).ToString();
@@ -410,13 +401,13 @@ public class PlayerMovement : MonoBehaviour {
                     {
                         Debug.Log("upshift");
                         appropriateGear = i;
-                        StartCoroutine(ChangeGear(appropriateGear));
+                        //StartCoroutine(ChangeGear(appropriateGear));
                         break;
                     }
                 }
 
                 //StartCoroutine(ChangeGear(appropriateGear));
-                //ChangeGear(appropriateGear);
+                ChangeGear(appropriateGear);
             }
 
             if (engineRPM <= minEngineRPM)
@@ -428,39 +419,45 @@ public class PlayerMovement : MonoBehaviour {
                     if (axels[1].leftWheel.rpm * gears[i].GearRatio > minEngineRPM)
                     {
                         appropriateGear = i;
-                        StartCoroutine(ChangeGear(appropriateGear));
+                        //StartCoroutine(ChangeGear(appropriateGear));
                         break;
                     }
                 }
 
                 //StartCoroutine(ChangeGear(appropriateGear));
-                //ChangeGear(appropriateGear);
+                ChangeGear(appropriateGear);
             }
         }
     }
 
-    /*void ChangeGear(int gear)
+    void ChangeGear(int gear)
     {
         currentGear = gear;
         gearText.text = gears[currentGear].GearName;
-    }*/
+    }
 
-    IEnumerator ChangeGear(int gear)
+    /*IEnumerator ChangeGear(int gear)
     {
         shifting = true;
         yield return new WaitForSeconds(1f);
         currentGear = gear;
         gearText.text = gears[currentGear].GearName;
         shifting = false;
-    }
+    }*/
 
     public void ResetCar()
     {
         transform.Translate(0, 5, 0, Space.World);
         //transform.position = resetPos + Vector3.up * 3f;
-        Quaternion resetRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
-        transform.rotation = resetRot;
+        //Quaternion resetRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
+        //transform.rotation = resetRot;
         rigid.velocity = Vector3.zero;
+    }
+
+    public void ResetToStart()
+    {
+        transform.position = resetPos + Vector3.up * 2f;
+        transform.rotation = resetRot;
     }
 }
 

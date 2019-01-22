@@ -85,12 +85,14 @@ public class Generator : MonoBehaviour {
 
         //place player exactly one "segment" into the road
         player.position = waypoints[courseDetail].position + Vector3.up * 2f;
-        //player.rotation = Quaternion.LookRotation((waypoints[2].transform.position - waypoints[1].transform.position).normalized);
         player.rotation = waypoints[courseDetail].rotation;
 
         //place finish line exactly one "segment" from the end
         finish.position = waypoints[waypoints.Length - courseDetail].position;
         finish.rotation = Quaternion.Euler(0, waypoints[waypoints.Length - courseDetail].rotation.eulerAngles.y, waypoints[waypoints.Length - courseDetail].rotation.eulerAngles.z);
+        player.GetComponentInChildren<WaypointUI>().waypoint = finish;
+        player.GetComponent<PlayerMovement>().ResetPosition = waypoints[courseDetail].position;
+        player.GetComponent<PlayerMovement>().ResetRotation = waypoints[courseDetail].rotation;
     }
 
     void Generate()

@@ -43,7 +43,7 @@ namespace ProceduralGenerator
                 {
                     for (int y = 0; y < heightMap.GetLength(1) - 1; y += stepSize)
                     {
-                        DiamondStep(x, y, stepSize, Random.Range(-randomHeight / 2f, randomHeight));
+                        DiamondStep(x, y, stepSize, Random.Range(0, randomHeight));
                     }
                 }
 
@@ -51,7 +51,7 @@ namespace ProceduralGenerator
                 {
                     for (int y = 0; y < heightMap.GetLength(1); y += halfStep)
                     {
-                        SquareStep(x, y, halfStep, Random.Range(-randomHeight / 2f, randomHeight));
+                        SquareStep(x, y, halfStep, Random.Range(0, randomHeight));
                     }
                 }
 
