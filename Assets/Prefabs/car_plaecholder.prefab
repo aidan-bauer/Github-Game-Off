@@ -698,6 +698,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &1803865019153976
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4109017186933298}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &1845270193981176
 GameObject:
   m_ObjectHideFlags: 1
@@ -715,7 +730,7 @@ GameObject:
   m_IsActive: 1
 --- !u!1 &1845566994173604
 GameObject:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 6
@@ -826,6 +841,20 @@ Transform:
   m_Children:
   - {fileID: 4852988625189268}
   m_Father: {fileID: 4685992411086598}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &4109017186933298
+Transform:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1803865019153976}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 4441658808098792}
+  m_Father: {fileID: 4817535034808074}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &4174479830928940
@@ -986,7 +1015,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.8, z: -7.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 4817535034808074}
+  m_Father: {fileID: 4109017186933298}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 3.0200002, y: 0, z: 0}
 --- !u!4 &4476430449314920
@@ -1139,7 +1168,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 4441658808098792}
+  - {fileID: 4109017186933298}
   - {fileID: 4338618353539920}
   - {fileID: 4757691664108044}
   - {fileID: 4685992411086598}
@@ -1814,13 +1843,13 @@ MonoBehaviour:
   forwardExtremumSlip: 0.7
   forwardExtremumValue: 1
   forwardAsymptoteSlip: 0.85
-  forwardAsymptoteValue: 0.7
-  forwardStiffness: 0.8
-  sidewaysExtremumSlip: 0.2
+  forwardAsymptoteValue: 1
+  forwardStiffness: 1
+  sidewaysExtremumSlip: 0.9
   sidewaysExtremumValue: 1
-  sidewaysAsymptoteSlip: 0.8
-  sidewaysAsymptoteValue: 0.75
-  sidewaysStiffness: 0.75
+  sidewaysAsymptoteSlip: 0.95
+  sidewaysAsymptoteValue: 1
+  sidewaysStiffness: 1
   trails: {fileID: 198641464591174698}
   trailColor:
     serializedVersion: 2
@@ -2092,6 +2121,7 @@ MonoBehaviour:
   player: {fileID: 4817535034808074}
   waypoint: {fileID: 0}
   angle: 0
+  dot: 0
   rotator: {fileID: 224847839334912694}
 --- !u!114 &114394137396069058
 MonoBehaviour:
@@ -2460,7 +2490,7 @@ WheelCollider:
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
   m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_WheelDampingRate: 0.1
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
     m_ExtremumValue: 1
@@ -2489,7 +2519,7 @@ WheelCollider:
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
   m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_WheelDampingRate: 0.1
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
     m_ExtremumValue: 1
@@ -2518,7 +2548,7 @@ WheelCollider:
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
   m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_WheelDampingRate: 0.1
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
     m_ExtremumValue: 1
@@ -2547,7 +2577,7 @@ WheelCollider:
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
   m_Mass: 20
-  m_WheelDampingRate: 0.25
+  m_WheelDampingRate: 0.1
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
     m_ExtremumValue: 1

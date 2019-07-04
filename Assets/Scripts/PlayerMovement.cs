@@ -52,7 +52,7 @@ public class PlayerMovement : MonoBehaviour {
     public float maxEngineRPM = 3000f;
     public float minEngineRPM = 1000f;
     float engineRPM = 0f;
-    int gas = 0;
+    float gas = 0;
     public float brakeForce = 75f;
     public float maxSteerAngle = 20f;
     public int turnRate = 2;
@@ -183,6 +183,7 @@ public class PlayerMovement : MonoBehaviour {
             {
                 gasPress = false;
                 brakePress = true;
+                Debug.Log("break pressed");
                 //trails.Stop();
             }
             else
@@ -192,26 +193,12 @@ public class PlayerMovement : MonoBehaviour {
                 //trails.Stop();
             }
 
-            if (Input.GetKey(controls[1]))
-            {
-                turnAngle = -turnRate;
-                //steerPress = true;
-            }
-            else if (Input.GetKey(controls[3]))
-            {
-                turnAngle = turnRate;
-                //steerPress = true;
-            }
-            else
-            {
-                turnAngle = 0;
-                //steerPress = false;
-            }
+            turnAngle = Input.GetAxis("Horizontal");
 
-            /*if (Input.GetKeyDown(reset))
+            if (Input.GetKeyDown(reset))
             {
                 ResetCar();
-            }*/
+            }
 
             //detect if the car is about to be on its roof
             if (transform.rotation.eulerAngles.z >= 110 && transform.rotation.eulerAngles.z <= 250)
@@ -252,8 +239,6 @@ public class PlayerMovement : MonoBehaviour {
                 particleRate = Mathf.Clamp(particleRate, 0, 250);
                 newMain.startColor = trailColor.Evaluate(Mathf.Clamp01(rigid.velocity.magnitude * 2.237f / 90f));
                 newEmission.rateOverTime = particleRate;
-                //newMain.startSpeed = -rigid.velocity.magnitude * 2.237f * 0.5f;
-                //newMain.startSpeed = -rigid.velocity.magnitude;
             }
         }
     }
@@ -272,35 +257,19 @@ public class PlayerMovement : MonoBehaviour {
                 {
                     if (gasPress)
                     {
+                        gas = Input.GetAxis("Vertical");
                         //power
                         axel.leftWheel.brakeTorque = 0f;
                         axel.rightWheel.brakeTorque = 0f;
 
-                        gas = 1;
-
-                        //tire dust particles
-                        /*for (int i = 0; i < tireDustEmissions.Length;  i++)
-                        {
-                            tireDustEmissions[i].rateOverTime = engineRPM / 10f;
-                        }*/
+                        axel.leftWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
+                        axel.rightWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
                     }
-                    else
-                    {
-                        axel.leftWheel.brakeTorque = 0f;
-                        axel.rightWheel.brakeTorque = 0f;
-
-                        axel.leftWheel.motorTorque = 0f;
-                        axel.rightWheel.motorTorque = 0f;
-                        gas = 0;
-                    }
-
-                    axel.leftWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
-                    axel.rightWheel.motorTorque = engineTorque / gears[currentGear].GearRatio * gas;
-                } else
+                }/* else
                 {
                     axel.leftWheel.brakeTorque = 0f;
                     axel.rightWheel.brakeTorque = 0f;
-                }
+                }*/
 
                 //apply steering controls info
                 if (axel.steering)
@@ -317,6 +286,8 @@ public class PlayerMovement : MonoBehaviour {
                     //if we're slow enough, start backing up
                     if (engineRPM <= 10f)
                     {
+                        Debug.Log("reverse, " + gas);
+                        //gas = Input.GetAxis("Vertical");
                         gas = -1;
                         ChangeGear(0);
 
@@ -448,10 +419,10 @@ public class PlayerMovement : MonoBehaviour {
     public void ResetCar()
     {
         transform.Translate(0, 5, 0, Space.World);
-        //transform.position = resetPos + Vector3.up * 3f;
-        //Quaternion resetRot = Quaternion.Euler(transform.rotation.eulerAngles.x, transform.rotation.eulerAngles.y, 0);
-        //transform.rotation = resetRot;
+        transform.position = resetPos + Vector3.up * 3f;
+        transform.rotation = resetRot;
         rigid.velocity = Vector3.zero;
+        currentGear = 1;
     }
 
     public void ResetToStart()

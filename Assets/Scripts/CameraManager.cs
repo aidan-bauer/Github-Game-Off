@@ -4,10 +4,27 @@ public class CameraManager : MonoBehaviour
 {
     [SerializeField] KeyCode cameraChangers = KeyCode.C;
     [SerializeField] Camera[] carCameras;
+
+    public Camera[] CarCameras
+    {
+        get
+        {
+            return carCameras;
+        }
+    }
+
     [Range(1f, 179f)]
     [SerializeField] float fov = 35f;
 
     int currentCameraIndex = 0;
+
+    public int CurrentCameraIndex
+    {
+        get
+        {
+            return currentCameraIndex;
+        }
+    }
 
     // Use this for initialization
     void Start () {
@@ -60,6 +77,11 @@ public class CameraManager : MonoBehaviour
             } else
             {
                 carCameras[i].gameObject.SetActive(false);
+            }
+
+            if (i == 0)
+            {
+
             }
         }
     }

@@ -26,6 +26,7 @@ public class Generator : MonoBehaviour {
     public int waypointSmoothingPasses = 3;
     [Range(5f, 40f)]
     public float roadWidth = 5f;
+    public int currentWaypoint = 0;
 
     public bool useRandomSeed = true;
     public string seed;
@@ -46,6 +47,13 @@ public class Generator : MonoBehaviour {
     int[] triangles;
 
     Transform[] waypoints;
+    public Transform[] Waypoints
+    {
+        get
+        {
+            return waypoints;
+        }
+    }
     List<Vector3> roadVertices;
     //List<Vector2> roadUV;
     List<int> roadTriangles;
@@ -175,24 +183,25 @@ public class Generator : MonoBehaviour {
 
         cc.GenerateCourse();
 
-        waypoints = new Transform[cc.CoursePoints.Count - 1];
+        waypoints = new Transform[(cc.CoursePoints.Count - 1)/courseDetail];
 
-        for (int i = 0; i < cc.CoursePoints.Count; i++)
+        for (int i = 0; i < waypoints.Length; i++)
         {
-            Debug.DrawLine(cc.CoursePoints[i], cc.CoursePoints[i] + (Vector3.up * 50f), Color.red, 1000f, false);
+            Debug.DrawLine(cc.CoursePoints[i * courseDetail], cc.CoursePoints[i * courseDetail] + (Vector3.up * 50f), Color.red, 1000f, false);
         }
 
         //generate and orient the waypoints
-        for (int i = 0; i < cc.CoursePoints.Count - 1; i++)
+        for (int i = 0; i < waypoints.Length; i++)
         {
-            Quaternion newRot = Quaternion.LookRotation((cc.CoursePoints[i] - cc.CoursePoints[i + 1]).normalized);
+            int currCoursePoint = i * courseDetail;
+            Quaternion newRot = Quaternion.LookRotation((cc.CoursePoints[currCoursePoint] - cc.CoursePoints[currCoursePoint + 1]).normalized);
 
-            if (i == cc.CoursePoints.Count - 1)
+            if (i == waypoints.Length - 1)
             {
-                newRot = Quaternion.LookRotation((cc.CoursePoints[i] - cc.CoursePoints[i - 1]).normalized);
+                newRot = Quaternion.LookRotation((cc.CoursePoints[currCoursePoint] - cc.CoursePoints[currCoursePoint - 1]).normalized);
             }
 
-            Transform nodeInst = Instantiate(waypoint, cc.CoursePoints[i], Quaternion.identity, road.transform) as Transform;
+            Transform nodeInst = Instantiate(waypoint, cc.CoursePoints[currCoursePoint], Quaternion.identity, road.transform) as Transform;
             //nodeInst.localScale = new Vector3(roadWidth, 2.5f, 1f);
             nodeInst.name += " " + i;
             nodeInst.localRotation = newRot;

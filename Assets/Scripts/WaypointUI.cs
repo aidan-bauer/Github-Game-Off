@@ -9,18 +9,22 @@ public class WaypointUI : MonoBehaviour {
 
     [SerializeField] RectTransform rotator;
 
+    CameraManager camManager;
+
 	// Use this for initialization
 	void Start () {
-        //rotator = GetComponentsInChildren<RectTransform>()[1];
+        camManager = GetComponentInParent<CameraManager>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
         Vector3 waypointAngle = waypoint.position - player.position;
         waypointAngle.Normalize();
-        //Vector3 angleDif = (waypointAngle-player.forward).normalized;
-        dot = Vector3.Dot(waypointAngle, player.right);
-        //angle = Mathf.Atan2(angleDif.z, angleDif.x) * Mathf.Rad2Deg;
+        Vector3 cameraRot = camManager.CarCameras[camManager.CurrentCameraIndex].transform.position + 
+            camManager.CarCameras[camManager.CurrentCameraIndex].transform.right;
+        cameraRot.Normalize();
+        //dot = Vector3.Dot(waypointAngle, player.right);
+        dot = Vector3.Dot(waypointAngle, cameraRot);
         angle = Quaternion.Angle(player.rotation, Quaternion.LookRotation(waypointAngle, Vector3.up));
         if (dot > 0)
         {
